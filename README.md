@@ -1,38 +1,44 @@
 #SOD Version 0.40 - Notes for users
 
-SOD (standing for Site-Occupation Disorder) is a package of tools for the computer modelling of periodic systems with site disorder, 
-using the supercell ensemble method. 
+SOD (standing for Site-Occupation Disorder) is a package of tools for the computer modelling of periodic systems with site disorder, using the supercell ensemble method. 
 
-The package is distributed under the (https://github.com/ypriverol/sod/blob/master/LICENSE.md)[GPL licence]. Please see details in the COPYING file. 
+The package is distributed under the [GPL licence](https://github.com/ypriverol/sod/blob/master/LICENSE.md). 
 
 You can find below the essential info needed to use SOD . Please note that I can give only limited support to users.
 
-1. Functionalities:
+##Functionalities:
 
-- identification of all inequivalent configurations of site substitutions in an arbitrary supercell of an  initial target structure with any space group symmetry.
+- Identification of all inequivalent configurations of site substitutions in an arbitrary supercell of an  initial target structure with any space group symmetry.
 
-- calculation of the degeneracies of configurations
+- Calculation of the degeneracies of configurations
 
-- generation of input files for codes like Gulp and Vasp
+- Generation of input files for codes like Gulp and Vasp
 
-- statistical mechanics processing of output
+- Statistical mechanics processing of output
 
-2. Installing SOD:
+##Installing SOD:
 
 - Download the file sod(version).tar (e.g. sod0.26.tar) and copy to a directory, say ROOTSOD
 
-- tar xvf sod(version).tar
+```bash
+tar xvf SOD-XXX.tar
+```
 
-- add ROOTSOD/sod(version)/exe to your executables path (e.g. in bash, add the line 'export PATH=$PATH:ROOTSOD/sod(version)/exe' to your .bashrc file)
+- ROOTSOD/sod(version)/exe to your executables path 
 
-3. Content of the folders:
+```bash 
+# add the exe folder to the to your .bashrc file
+export PATH=$PATH:ROOTSOD/sod(version)/exe
+```
+
+##Content of the folders:
 
 - sod(version)/src contains the source files.
 - sod(version)/sgo is a library of space group operators (e.g. 131.sgo contains the operators of the space group 131).
 - sod(version)/exe contains the executables. Linux executables are provided here.
 - sod(version)/examples contains three examples, based on the cubic perovskite, rutile and rocksalt structures.
 
-4. Running SOD
+##Running SOD
 
 - We recommend to create a new folder (say FOLDER_NAME) for each application. This will be referred to as the working directory.
 
@@ -40,7 +46,9 @@ You can find below the essential info needed to use SOD . Please note that I can
 
 - In FOLDER_NAME, you must also include a file named SGO with the matrix-vector representations of the symmetry operators. First check if your space group is included in the ROOTSOD/sod(version)/sgo library; if this is the case, just copy the file into your working directory, under the name SGO:
 
+```bash
 cp ROOTSOD/sod(version)/sgo ./SGO
+```
 
 otherwise you have to create the file using the Tables of Crystallography, or from the website of the Bilbao Crystallographic Server <www.cryst.ehy.es>. The first three numbers in each line are one row of the operator matrix and the fourth number is the component of the operator's translation vector.
 
@@ -54,7 +62,7 @@ bottom.gulp contains the tail of the gulp input file (everything after the list 
 
 sod_comb
 
-5. Output of the sod_comb programme.
+##Output of the sod_comb programme.
 
 - When the programme finishes, it writes to the standard output the total number of configurations and the number of independent configurations according to the crystal symmetry, plus some other useful information.
 
@@ -62,7 +70,7 @@ sod_comb
 
 - The directory CALCS is generated, which contains the input files for Gulp or VASP  and a script that sends the job.
 
-6. Configurational averages and thermodynamics:
+##Configurational averages and thermodynamics:
 
 In order to do configurational averages and thermodynamics, you need to execute the program
 
@@ -101,11 +109,10 @@ Very important note: While configurational averages (e.g. of cell parameters and
 
 
 
-7. If you use SOD in your research work, please include a citation to this article:
+## If you use SOD in your research work, please include a citation to this article:
 
-"Symmetry-adapted configurational modelling of fractional site
-occupancy in solids." R. Grau-Crespo, S. Hamad, C.R.A. Catlow and N. H. de Leeuw. Journal of
-Physics - Condensed Matter 19, 256201 (2007)
+*Grau-Crespo, R., Hamad, S., Catlow, C. R. A., & De Leeuw, N. H. (2007). Symmetry-adapted configurational modelling of fractional site occupancy in solids. Journal of Physics: Condensed Matter, 19(25), 256201.*
+[Original Paper](http://iopscience.iop.org/article/10.1088/0953-8984/19/25/256201/meta) 
 
 and if possible send me a pdf copy of your paper.
 
