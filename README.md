@@ -111,7 +111,8 @@ Very important note: While configurational averages (e.g. of cell parameters and
 
 ## If you use SOD in your research work, please include a citation to this article:
 
-Grau-Crespo, R., Hamad, S., Catlow, C. R. A., & De Leeuw, N. H. (2007). Symmetry-adapted configurational modelling of fractional site occupancy in solids. Journal of Physics: Condensed Matter, 19(25), 256201. [Original Paper](http://iopscience.iop.org/article/10.1088/0953-8984/19/25/256201/meta) 
+*Grau-Crespo, R., Hamad, S., Catlow, C. R. A., & De Leeuw, N. H. (2007). Symmetry-adapted configurational modelling of fractional site occupancy in solids. Journal of Physics: Condensed Matter, 19(25), 256201.*
+[Original Paper](http://iopscience.iop.org/article/10.1088/0953-8984/19/25/256201/meta) 
 
 and if possible send me a pdf copy of your paper.
 
