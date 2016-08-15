@@ -1,3 +1,0 @@
-# ifc -o ../../exe/statsod statsod.f90
-gfortran -o ../../exe/statsod statsod.f90
-
