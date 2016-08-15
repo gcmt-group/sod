@@ -1,0 +1,12 @@
+language: julia
+julia:
+  - release
+  - nightly
+before_install:
+  - sudo apt-get update -qq -y
+  - sudo apt-get install -y gfortran
+script:
+  - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
+  - make
+  - make alt
+  - LD_LIBRARY_PATH=. julia main.jl
