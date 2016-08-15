@@ -1,0 +1,5 @@
+vasp < c00001.vaspin > c00001.vaspout
+vasp < c00002.vaspin > c00002.vaspout
+vasp < c00003.vaspin > c00003.vaspout
+vasp < c00004.vaspin > c00004.vaspout
+vasp < c00005.vaspin > c00005.vaspout

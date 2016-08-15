@@ -1,0 +1,18 @@
+species   6
+Sr     core    2.000000
+La     core    3.000000
+Co     core    3.000000
+O      core    0.869020
+O      shel   -2.869020
+buck
+Co    core O     shel     684.900000 0.337200    0.00000  0.000 12.000
+buck
+La    core O     shel    1439.700000 0.365100    0.00000  0.000 12.000
+buck
+O     shel O     shel   22764.000000 0.149000   27.87900  0.000 12.000
+buck
+Sr    core O     shel    1956.702000 0.325200    0.00000  0.000 12.000
+spring
+O        74.920000
+cuts 0.800000
+

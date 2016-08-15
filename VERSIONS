@@ -1,0 +1,23 @@
+version 0.23
+--------------
+- Mapping implemented: The configurational space in one structure can be mapped to a different structure (MAPPER>0) to generate calculation files.
+
+version 0.24
+-------------
+- Input file generation works well now up to 9999 independent configurations
+
+version 0.25
+-------------
+- Various bugs corrected. More space groups added to space group library. 
+
+version 0.26
+-------------
+- Bug on generation of equivalence matrix corrected. More space groups added to space group library. 
+- Ca-doped MgO (rocksalt structure) added as a third example with the distribution
+
+version 0.40
+------------
+- GPL licence added
+- More space groups added to SGO library
+- Added element symbols in VASP input files
+- Corrected a few bugs. For example: if VASP files are being created, the section in INSOD about core/shells is not read.
