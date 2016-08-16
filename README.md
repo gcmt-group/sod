@@ -18,27 +18,34 @@ You can find below the essential info needed to use SOD . Please note that I can
 
 - Statistical mechanics processing of output
 
-##Installing SOD:
-
-- Download the file sod(version).tar (e.g. sod0.26.tar) and copy to a directory, say ROOTSOD
-
-```bash
-tar xvf SOD-XXX.tar
-```
-
-- ROOTSOD/sod(version)/exe to your executables path 
-
-```bash 
-# add the exe folder to the to your .bashrc file
-export PATH=$PATH:ROOTSOD/sod(version)/exe
-```
 
 ##Content of the folders:
 
 - sod(version)/src contains the source files.
 - sod(version)/sgo is a library of space group operators (e.g. 131.sgo contains the operators of the space group 131).
-- sod(version)/exe contains the executables. Linux executables are provided here.
+- sod(version)/bin contains the executables. Linux executables are provided here.
 - sod(version)/examples contains three examples, based on the cubic perovskite, rutile and rocksalt structures.
+
+##Compiling & Installing SOD:
+
+- Download the file sod-XXX.tar (e.g. sod-0.40.tar) and copy to a directory, say ROOTSOD
+ 
+```bash
+tar xvf sod-XXX.tar
+```
+
+- Make compile all the executables into the **bin** folder
+ 
+```bash 
+> make all
+```
+
+- ROOTSOD/sod-XXX/bin to your executables path 
+
+```bash 
+# add the exe folder to the to your .bashrc file
+export PATH=$PATH:ROOTSOD/sod(version)/bin
+```
 
 ##Running SOD
 
