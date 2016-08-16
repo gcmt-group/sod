@@ -8,6 +8,7 @@ The package is distributed under the [GPL licence](https://github.com/ypriverol/
 
 You can find below the essential info needed to use SOD . Please note that I can give only limited support to users.
 
+
 ##Functionalities:
 
 - Identification of all inequivalent configurations of site substitutions in an arbitrary supercell of an  initial target structure with any space group symmetry.
@@ -21,17 +22,17 @@ You can find below the essential info needed to use SOD . Please note that I can
 
 ##Content of the folders:
 
-- sod(version)/src contains the source files.
-- sod(version)/sgo is a library of space group operators (e.g. 131.sgo contains the operators of the space group 131).
-- sod(version)/bin contains the executables. Linux executables are provided here.
-- sod(version)/examples contains three examples, based on the cubic perovskite, rutile and rocksalt structures.
+- sod-(version)/src contains the source files.
+- sod-(version)/sgo is a library of space group operators (e.g. 131.sgo contains the operators of the space group 131).
+- sod-(version)/bin contains the executables. Linux executables are provided here.
+- sod-(version)/examples contains three examples, based on the cubic perovskite, rutile and rocksalt structures.
 
 ##Compiling & Installing SOD:
 
-- Download the file sod-XXX.tar (e.g. sod-0.40.tar) from releases [link](https://github.com/ypriverol/sod/releases) and copy to a directory, say ROOTSOD
+- Download the file sod-(version).tar.gz (e.g. sod-0.40.tar.gz) and copy to a directory, say ROOTSOD
  
 ```bash
-tar xvf sod-XXX.tar
+tar xzvf sod-(version).tar.gz
 ```
 
 - Make compile all the executables into the **bin** folder
@@ -43,7 +44,7 @@ tar xvf sod-XXX.tar
 - ROOTSOD/sod-XXX/bin to your executables path 
 
 ```bash 
-# add the exe folder to the to your .bashrc file
+# add the bin folder to the to your .bashrc file
 export PATH=$PATH:ROOTSOD/sod(version)/bin
 ```
 
@@ -77,7 +78,8 @@ sod_comb
 
 - It also writes the data file OUTSOD, which contains information on the independent configurations (one line for each configuration). The first number is the index of the configuration, the second is its degeneracy, and the next numbers are the substitution sites.
 
-- The directory CALCS is generated, which contains the input files for Gulp or VASP  and a script that sends the job.
+- The directory CALCS is generated, which contains the input files for Gulp or VASP  and a script that sends the job. 
+
 
 ##Configurational averages and thermodynamics:
 
@@ -114,8 +116,8 @@ The data can be cell lenghts, or volumes (please see SOD papers for strategies o
 
 sod_stat will generate two files: probabilities.dat and statistics.dat, whose content is self-explanatory.
 
-Very important note: While configurational averages (e.g. of cell parameters and enthalpies) tend to converge very quickly with supercell size, entropies and free energies, which are not defined by averaging, converge very slowly with supercell size, and are generally in large error when using the SOD method. I therefore do not recommend using SOD for the calculation of entropies and free energies, unless appropriate correcting procedures have been used.
 
+Important note: While configurational averages (e.g. of cell parameters and enthalpies) tend to converge very quickly with supercell size, entropies and free energies, which are not defined by averaging, converge very slowly with supercell size, and are generally in large error when using the SOD method. I therefore do not recommend using SOD for the calculation of entropies and free energies, unless appropriate correcting procedures have been used.
 
 
 ## If you use SOD in your research work, please include a citation to this article:
@@ -129,4 +131,3 @@ and if possible send me a pdf copy of your paper.
 Happy SODing!!!
 
 Ricardo Grau-Crespo
-
