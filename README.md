@@ -28,7 +28,7 @@ You can find below the essential info needed to use SOD . Please note that I can
 
 ##Compiling & Installing SOD:
 
-- Download the file sod-XXX.tar (e.g. sod-0.40.tar) and copy to a directory, say ROOTSOD
+- Download the file sod-XXX.tar (e.g. sod-0.40.tar) from releases [link](https://github.com/ypriverol/sod/releases) and copy to a directory, say ROOTSOD
  
 ```bash
 tar xvf sod-XXX.tar
