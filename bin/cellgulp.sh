@@ -1,3 +1,5 @@
+#!/bin/bash
+
 awk     '{if (($1 == "Final") && ($2 == "cell") ) {getline;getline;getline;print $2            }}' $1 >> a.dat
 awk     '{if (($1 == "Final") && ($2 == "cell") ) {getline;getline;getline;getline; print $2         }}' $1 >> b.dat
 awk     '{if (($1 == "Final") && ($2 == "cell") ) {getline;getline;getline;getline;getline; print $2 }}' $1 >> c.dat

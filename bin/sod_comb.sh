@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/bash
 # This script generates the correct names for the input files as well as
 # the executable that will run all the simulations
 
@@ -15,8 +15,8 @@ if ($FILER > 0) then
 
 mkdir CALCS
 cd CALCS
-mv ../fort.* .
-cp ../OUTSOD .
+mv fort.* .
+cp OUTSOD .
 
 # FILER=1 for GULP
 if ($FILER == 1)  then

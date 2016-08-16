@@ -1,3 +1,5 @@
+#!/bin/bash
+
 ls -l *.gout |awk '{print "cellgulp", $8}' > rungetcell
 chmod +x rungetcell
 ./rungetcell

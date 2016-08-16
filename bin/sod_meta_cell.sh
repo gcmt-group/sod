@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/bin/bash
+
 ls -l *.mout |awk '{print "./getcell " $9}' > rungetcell
 chmod +x rungetcell
 rm a.dat b.dat c.dat
