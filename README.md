@@ -60,14 +60,13 @@ cp ROOTSOD/sod(version)/sgo ./SGO
 
 otherwise you have to create the file using the Tables of Crystallography, or from the website of the Bilbao Crystallographic Server <www.cryst.ehy.es>. The first three numbers in each line are one row of the operator matrix and the fourth number is the component of the operator translation vector.
 
-- If you want to generate Gulp input files for all the independent configurations found by SOD, in addition to setting FILER=1 in the INPUT file, you must provide two files in the working directory:
+- If you want to generate Gulp input files for all the independent configurations found by SOD, in addition to setting FILER=1 in the *INSOD* file, you must provide two files in the working directory:
 
 top.gulp contains the heading of the gulp input file (until the keyword cell).
 
 bottom.gulp contains the tail of the gulp input file (everything after the list of coordinates, including species, potentials, etc).
 
 - To run the combinatorics program, just type:
-
 
 ```bash
 sod_comb.sh
@@ -153,11 +152,11 @@ However,  the easiest way to run the spbe module is like this:
 
 - Use the names n00 n01 n02 n03 etc for the folders containing the calculations for 0, 1, 2, 3... substitutions. 
 - Make sure that the folders n00, n01 and n02 contain an ENERGIES and an OUTSOD file each (OUTSOD is not necessary for n00)
-- If you want to use spbe, say, for n=3, first run ```sod_comb``` for n=3 substitutions, rename CALCS to n03, and create a folder within n03, say n03/spbe/
+- If you want to use spbe, say, for *n*=3, first run ```sod_comb``` for *n*=3 substitutions, rename CALCS to n03, and create a folder within n03, say n03/spbe/
 - From the n03/spbe folder, just run the script ```sod_spbe0.sh```, which will copy the relevant input files into the current folder and will call ```spbesod```
-- It is also possible to run the spbe program using data from the other end of the solid solution (*x*=1). In that case, run the script ```sod_spbe1.sh```, which will copy the files from the folders with N, N-1, N-2 substitutions, will "invert" the OUTSOD files as needed, and call ```spbesod```. 
+- It is also possible to run the spbe program using data from the other end of the solid solution (*x*=1). In that case, run the script ```sod_spbe1.sh```, which will copy the files from the folders with *N*, *N*-1, *N*-2 substitutions, will "invert" the *OUTSOD* files as needed, and call ```spbesod```. 
 
-Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations, using the INSPBE file. However, this feature is only for testing purposes at the moment. Please email Dr Grau-Crespo if interested.  
+Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations, using the *INSPBE* file. However, this feature is only for testing purposes at the moment. Please email Dr Grau-Crespo if interested.  
 
 ## Citing SOD
 
