@@ -33,10 +33,10 @@ You can find below the essential info needed to use SOD. Please note that SOD au
 tar xzvf sod(version).tar.gz
 ```
 
-- Make compile all the executables into the **bin** folder:
+- Make compile all the executables into the **bin** folder (you might need to edit the name of your fortran compiler in Makefile):
  
 ```bash 
-> make all
+make all
 ```
 
 - Add ROOTSOD/sod(version)/bin to your executables path 
