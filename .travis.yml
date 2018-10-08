@@ -7,5 +7,5 @@ before_install:
   - sudo apt-get install -y gfortran-4.6
 script:
   - if [[ -a .git/shallow ]]; then git fetch --unshallow; fi
-  - mkdir bin/
+  - mkdir -i bin/
   - make all
