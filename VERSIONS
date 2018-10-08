@@ -1,5 +1,0 @@
-version 0.40
-------------
-- GPL licence added
-- Added element symbols in VASP input files
-- Corrected a few bugs. For example: if VASP files are being created, the section in INSOD about core/shells is not read.
