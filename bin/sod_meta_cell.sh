@@ -1,6 +1,7 @@
 #!/bin/bash
 
-ls -l *.mout |awk '{print "./getcell " $9}' > rungetcell
+n_columns_ls=`ls -l |tail -1 |awk '{ FS = "|" } ; { print NF}'`
+ls -l *.mout |awk -v nc=$n_columns_ls '{print "./getcell.sh " $nc}' > rungetcell
 chmod +x rungetcell
 rm a.dat b.dat c.dat
 ./rungetcell

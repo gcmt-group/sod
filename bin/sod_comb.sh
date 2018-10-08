@@ -2,8 +2,8 @@
 # This script generates the correct names for the input files 
 # It also generates a script that can be used to run all the simulations
 
-rm  matrix* coordinates.xyz  OUTSOD supercell
-rm -r CALCS
+rm -f OUTSOD SUPERCELL EQMATRIX OPERATORS cSGO 
+rm -rf CALCS
 
 clear
 
@@ -58,10 +58,12 @@ if [ $FILER -ne 0 ]; then
   rm tmp*
 
   # This is to create the script that is going to run the calculations, with appropriate extension
-  ls -l *$extin | awk -v extout=$extout -v program=$program '{print program,"<",$9,">",$9"."extout}' |sed s/$extin.$extout/$extout/  > job_sender
+
+ n_columns_ls=`ls -l |tail -1 |awk '{ FS = "|" } ; { print NF}'`
+ ls -l *$extin |awk -v nc=$n_columns_ls -v extout=$extout -v program=$program '{print program,"<",$nc,">",$nc"."extout}' |sed s/$extin.$extout/$extout/  > job_sender
   chmod +x job_sender
 
 fi
 
 cd ..
-rm filer coord* supercell matrix* operat* conf* 
+rm filer coord* 

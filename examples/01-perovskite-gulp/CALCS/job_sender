@@ -1,3 +1,9 @@
 gulp < c00001.gin > c00001.gout
 gulp < c00002.gin > c00002.gout
 gulp < c00003.gin > c00003.gout
+gulp < c00004.gin > c00004.gout
+gulp < c00005.gin > c00005.gout
+gulp < c00006.gin > c00006.gout
+gulp < c00007.gin > c00007.gout
+gulp < c00008.gin > c00008.gout
+gulp < c00009.gin > c00009.gout

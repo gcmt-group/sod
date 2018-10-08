@@ -24,7 +24,7 @@
 
        INTEGER,PARAMETER :: NCONFMAX=10000, NCOLMAX=20, NTEMPMAX=100
        REAL*8,PARAMETER :: kB=8.61734E-5
-       INTEGER :: m,Mm, g, ncol, col, tt, Ntt
+       INTEGER :: m, auxm, Mm, g, ncol, col, tt, Ntt, nsubs
        INTEGER, DIMENSION(NTEMPMAX) :: mpmax, mpmin
        REAL*8,DIMENSION(NTEMPMAX) :: Z,E,F,S,Edmin,Edmax,T
        REAL*8,DIMENSION(NCONFMAX) :: ene, Sd
@@ -32,13 +32,22 @@
        INTEGER,DIMENSION(NCONFMAX) :: conf,omega
        REAL*8,DIMENSION(NCOLMAX,NCONFMAX) :: data 
        REAL*8,DIMENSION(NCOLMAX,NTEMPMAX) :: avedata 
+       LOGICAL :: TEMPERATURES_exists, DATA_exists
 
 
-       OPEN (UNIT=10,FILE="TEMPERATURES")
+
+!Input files
        OPEN (UNIT=11,FILE="OUTSOD")
        OPEN (UNIT=12,FILE="ENERGIES")
        OPEN (UNIT=13,FILE="DATA")
 
+       INQUIRE(FILE="TEMPERATURES", EXIST=TEMPERATURES_exists)
+       if (TEMPERATURES_exists) then
+          OPEN (UNIT=10, FILE="TEMPERATURES")
+       endif
+
+
+!Output files
        OPEN (UNIT=20,FILE="probabilities.dat")
        OPEN (UNIT=21,FILE="statistics.dat")
 
@@ -47,14 +56,21 @@
 !      Read the TEMPERATURES files
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-
-        tt=1
-  1     continue
-        read(10,*,end=10)  T(tt)
-        tt=tt+1
-        goto 1
-  10    continue
-        Ntt=tt-1
+        if (TEMPERATURES_exists) then
+           tt=1
+  1        continue
+           read(10,*,end=10)  T(tt)
+           tt=tt+1
+           goto 1
+  10       continue
+           Ntt=tt-1
+        else
+           T(1)=1.0
+           T(2)=300.0
+           T(3)=1000.0
+           T(4)=100000000000.0
+           Ntt=4
+        endif
 
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -62,14 +78,11 @@
 !      giving configuration numbers and degeneracies
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-
-        m=1
-  2     continue
-        read(11,*,end=11)  conf(m),omega(m)
-        m=m+1
-        goto 2
-  11    continue
-        Mm=m-1
+        read(11,*) nsubs 
+        read(11,*) Mm 
+        do m=1, Mm
+          read(11,*)  auxm, omega(m)
+        enddo
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !      Read ENERGIES 

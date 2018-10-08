@@ -2,7 +2,7 @@
 Sr/La substitution in LaAlO3 perovskite
 
 # a,b,c,alpha,beta,gamma
-3.5  3.5  3.5  90.000  90.000  90.000
+3.6  3.6  3.6  90.000  90.000  90.000
 
 # nsp: Number of species in the parent structure
 3
@@ -19,7 +19,7 @@ La Al O
 0.5  0.5  0.0
 
 # na,nb,nc (supercell definition)
-2 2 2
+4 4 4
 
 # sptarget: Species to be substituted
 1

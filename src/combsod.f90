@@ -1,4 +1,4 @@
-!*******************************************************************************
+
 !    Copyright (c) 2014 Ricardo Grau-Crespo, Said Hamad
 !
 !    This file is part of the SOD package.
@@ -57,20 +57,19 @@
        CHARACTER :: sindcount*5,snumber*4
 
 
-!!!!!! Input files
+! Input files
 
        OPEN (UNIT= 9,FILE="INSOD")
        OPEN (UNIT=12,FILE="SGO")
 
-!!!!!! Output files
+! Output files
 
        OPEN (UNIT=25,FILE="coordinates.xyz")
-       OPEN (UNIT=26,FILE="matrix")
-       OPEN (UNIT=27,FILE="conf")
+       OPEN (UNIT=26,FILE="EQMATRIX")
        OPEN (UNIT=30,FILE="OUTSOD")
-       OPEN (UNIT=31,FILE="supercell")
+       OPEN (UNIT=31,FILE="SUPERCELL")
        OPEN (UNIT=43,FILE="filer")
-       OPEN (UNIT=46,FILE="operators")
+       OPEN (UNIT=46,FILE="OPERATORS")
        OPEN (UNIT=47,FILE="cSGO")
 	
 
@@ -86,25 +85,26 @@
 ! sptarget            Number of the species to be substituted
 ! at0,at1,at          Indexes for the atoms in the assymetric unit, unit cell and supercell
 ! nat0,nat1,nat       Total numbers of atoms in the assymetric unit, unit cell and supercell
-! at1r,nat1r	      Idem for the atoms in the redundant cell (with repeated positions)
-! atini,atfin	      Initial and final atom indexes of the species to be substituted
-! npos		      Number of atoms of the target species 
-! conf		      List of all configurations (each configuration is a list of the substituted positions)
-! count		      Index for the configurations (conf)     
+! at1r,nat1r	        Idem for the atoms in the redundant cell (with repeated positions)
+! atini,atfin	        Initial and final atom indexes of the species to be substituted
+! pos                 Index for atomic positions of the target species
+! npos		            Number of atoms of the target species 
+! conf		            List of all configurations (each configuration is a list of the substituted positions)
+! count		            Index for the configurations (conf)     
 ! ntc                 Total number of configurations in conf (count=1,ntc)
 ! indconf             List of independent configurations 
 ! indcount            Index for the independent configurations
 ! nic                 Total number of independent configurations in indconf (indcount=1,nic)
 ! equivconf           Temporary list containing the equivalent configurations at every step of the algorithm
 ! equivcount          Index for the equivalent configurations (equivconf)     
-! tol0 		      General tolerance
-! tol1 		      Tolerance used for correcting the x-FLOOR(x) function
+! tol0 		            General tolerance
+! tol1 		            Tolerance used for correcting the x-FLOOR(x) function
 !
 !
 !
 
        WRITE (*,*) "**************************************************************************** " 
-       WRITE (*,*) "         SOD (Site Occupancy Disorder) program, version 0.40  " 
+       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.44  " 
        WRITE (*,*) " " 
        WRITE (*,*) "         Authors: R. Grau-Crespo and S. Hamad                                   " 
        WRITE (*,*) " " 
@@ -465,7 +465,6 @@
        WRITE (*,*) ""
        WRITE (*,*) ""
        WRITE (*,*) "Generating the complete configurational space..." 
-! 161   format(a48)
        WRITE (*,*) " " 
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -527,10 +526,14 @@
 	do at=atini,atfin
 	   att=att+1
            eqmatrixtarget(op,att)=fulleqmatrix(op,at)-atini+1
-		WRITE(26,*)op,att,eqmatrixtarget(op,att)
 	enddo
- 162   format(50(i3))
 	enddo
+
+
+  WRITE(26,*) nop,npos
+  do op=1, nop
+      WRITE(26,*) (eqmatrixtarget(op,pos), pos=1,npos)
+  enddo
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !         Generate the list of configurations
@@ -709,6 +712,8 @@
 	WRITE(*,*) "       Number of inequivalent configurations:               ",nic
 	WRITE(*,*) " "
 
+  WRITE(30,*) nsubs, " substitutions in ", npos, "sites" 
+  WRITE(30,*) nic, " configurations" 
 	do indcount=1,nic
 	WRITE(30,330) indcount,degen(indcount),indconf(indcount,1:nsubs)
  330    format(i6,1x,i6,30(1x,i4))

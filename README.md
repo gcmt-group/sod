@@ -1,58 +1,56 @@
 ![Alt](https://travis-ci.org/ypriverol/sod.svg?branch=master "Travis Integration")
 
-#SOD Version 0.40 - Notes for users
+# SOD 0.44 - Notes for users
 
 SOD (standing for Site-Occupation Disorder) is a package of tools for the computer modelling of periodic systems with site disorder, using the supercell ensemble method. 
 
 The package is distributed under the [GPL licence](https://github.com/ypriverol/sod/blob/master/LICENSE.md). 
 
-You can find below the essential info needed to use SOD . Please note that I can give only limited support to users.
+You can find below the essential info needed to use SOD. Please note that SOD authors can give only limited support to users.
 
 
-##Functionalities:
+## Functionalities
 
 - Identification of all inequivalent configurations of site substitutions in an arbitrary supercell of an  initial target structure with any space group symmetry.
-
-- Calculation of the degeneracies of configurations
-
-- Generation of input files for codes like Gulp and Vasp
-
-- Statistical mechanics processing of output
+- Calculation of the degeneracies of configurations.
+- Generation of input files for codes like GULP and VASP.
+- Simple extrapolation of energies from low to high concentrations within a supercell.
+- Statistical mechanics processing of output.
 
 
-##Content of the folders:
+## Content of the folders
 
-- sod-(version)/src contains the source files.
-- sod-(version)/sgo is a library of space group operators (e.g. 131.sgo contains the operators of the space group 131).
-- sod-(version)/bin contains the executables. Linux executables are provided here.
-- sod-(version)/examples contains three examples, based on the cubic perovskite, rutile and rocksalt structures.
+- sod(version)/src contains the source files.
+- sod(version)/sgo is a library of space group operators (e.g. 131.sgo contains the operators of the space group 131).
+- sod(version)/bin contains the executables. Linux executables are provided here.
+- sod(version)/examples contains three examples, based on the cubic perovskite, rutile and rocksalt structures.
 
-##Compiling & Installing SOD:
+## Compiling & installing SOD
 
-- Download the file sod-(version).tar.gz (e.g. sod-0.40.tar.gz) and copy to a directory, say ROOTSOD
+- Download the file sod(version).tar.gz (e.g. sod0.44.tar.gz) and copy to a directory, say ROOTSOD:
  
 ```bash
-tar xzvf sod-(version).tar.gz
+tar xzvf sod(version).tar.gz
 ```
 
-- Make compile all the executables into the **bin** folder
+- Make compile all the executables into the **bin** folder:
  
 ```bash 
 > make all
 ```
 
-- ROOTSOD/sod-XXX/bin to your executables path 
+- Add ROOTSOD/sod(version)/bin to your executables path 
 
 ```bash 
-# add the bin folder to the to your .bashrc file
+# add the bin folder to the executables path in your .bashrc file
 export PATH=$PATH:ROOTSOD/sod(version)/bin
 ```
 
-##Running SOD
+## Running SOD
 
 - We recommend to create a new folder (say FOLDER_NAME) for each application. This will be referred to as the working directory.
 
-- In FOLDER_NAME, you must create a file named *INSOD* which contains all the information for running the combinatorics part of the program. Use the *INSOD* file given in one of the examples. The file is self-explanatory. In the current version the format of this file is rigid, so keep the same number of blank lines.
+- In FOLDER_NAME, you must create a file named *INSOD* which contains all the information for running the combinatorics part of the program. Use the *INSOD* file given in one of the examples. The file is self-explanatory. The format of this file is rigid, so keep the same number of blank lines.
 
 - In FOLDER_NAME, you must also include a file named SGO with the matrix-vector representations of the symmetry operators. First check if your space group is included in the ROOTSOD/sod(version)/sgo library; if this is the case, just copy the file into your working directory, under the name SGO:
 
@@ -60,7 +58,7 @@ export PATH=$PATH:ROOTSOD/sod(version)/bin
 cp ROOTSOD/sod(version)/sgo ./SGO
 ```
 
-otherwise you have to create the file using the Tables of Crystallography, or from the website of the Bilbao Crystallographic Server <www.cryst.ehy.es>. The first three numbers in each line are one row of the operator matrix and the fourth number is the component of the operator's translation vector.
+otherwise you have to create the file using the Tables of Crystallography, or from the website of the Bilbao Crystallographic Server <www.cryst.ehy.es>. The first three numbers in each line are one row of the operator matrix and the fourth number is the component of the operator translation vector.
 
 - If you want to generate Gulp input files for all the independent configurations found by SOD, in addition to setting FILER=1 in the INPUT file, you must provide two files in the working directory:
 
@@ -70,22 +68,29 @@ bottom.gulp contains the tail of the gulp input file (everything after the list 
 
 - To run the combinatorics program, just type:
 
-sod_comb
 
-##Output of the sod_comb programme.
+```bash
+sod_comb.sh
+```
+
+## Output of sod_comb.sh 
 
 - When the programme finishes, it writes to the standard output the total number of configurations and the number of independent configurations according to the crystal symmetry, plus some other useful information.
 
-- It also writes the data file *OUTSOD*, which contains information on the independent configurations (one line for each configuration). The first number is the index of the configuration, the second is its degeneracy, and the next numbers are the substitution sites.
+- It writes the data file *OUTSOD*, which contains information on the independent configurations (one line for each configuration). The first number is the index of the configuration, the second is its degeneracy, and the next numbers are the substitution sites.
 
-- The directory *CALCS* is generated, which contains the input files for Gulp or VASP  and a script that sends the job. 
+- It also writes the file *EQMATRIX*, which gives information about  how each supercell operator transforms each atom position. 
+
+- The directory *CALCS* is generated, which contains the input files for GULP or VASP, a copy of the *OUTSOD* and *EQMATRIX* files,  and a script that sends the job. 
 
 
-##Configurational averages and thermodynamics:
+## Configurational averages and thermodynamics:
 
-In order to do configurational averages and thermodynamics, you need to execute the program
+In order to calculate configurational averages and obtain thermodynamic quantities, you need to execute the script:
 
-sod_stat
+```bash
+sod_stat.sh
+```
 
 which requires 4 input files:
 
@@ -93,41 +98,76 @@ which requires 4 input files:
 
 - *TEMPERATURES*, a list of temperatures for the Boltzmann statistics, in one column, e.g.:
 
+```bash
+300
 600
 1000
+1250
 1500
+1750
 2000
+```
 
-- ENERGIES, which contains (in one column) the energies of all the configurations, in the same order that they were generated by SOD (like in the OUTSOD file). There are some scripts in ROOTSOD/sod(version)/bin/  to help you do this:
+(if the TEMPERATURES file does not exist, sod_stat calculates thermodynamic properties at T=1K, 300K, 1000K and in the limit of a very high temperature). 
 
-a) If you are using GULP, the script ```sod_gulp_ener.sh``` will extract all the energies, assuming all output files,  with extension .gout, are in the same folder. If you have calculated vibrational free energies for each configurations, ```sod_gulp_free.sh``` will extract these. Depending on your Unix system, you might need to change $9 (for example, to $8) in ```sod_gulp_ener.sh``` (this refers to the number of the column containing the file names when you execute the command "ls -al" in your unix system).
+- *ENERGIES*, which contains (in one column) the energies of all the configurations, in the same order that they were generated by SOD (like in the OUTSOD file). There are some scripts in ROOTSOD/sod(version)/bin/  to help you do this:
 
-b) If you are using VASP, the script ```sod_vasp_ener.sh``` will extract all the energies, assuming you have folders 01, 02, 03, etc. each containing one calculation.  If you have more than 99 configurations and therefore have folders 001, 002, ..., 131, 132, etc. then you should edit the ```sod_vasp_ener.sh``` script, changing ?? to ???. Depending on your Unix system, you might need to change $9 (for example, to $8) in ```sod_gulp_ener.sh``` (this refers to the number of the column containing the file names when you execute the command "ls -al" in your unix system).
+   1. If you are using GULP, the script  ```sod_gulp_ener.sh``` will extract all the energies, assuming all output files,  with extension .gout, are in the same folder. If you have calculated vibrational free energies for each configuration, ```sod_gulp_free.sh``` will extract these. 
 
-- DATA, which contains n colums of data to average. The first line contains just the number n of columns to read. For example:
+   2. If you are using VASP, the script ```sod_vasp_ener.sh``` will extract all the energies, assuming you have separate folders for each configuration. 
 
+- *DATA*, which contains *ncol* colums of data to average. The first line contains just the number *ncol* of columns to read. For example:
+
+```bash
 2
 34.5   4.34
 37.7   4.35
 35.6   4.38
 38.8   4.41
+```
 
 The data can be cell lenghts, or volumes (please see SOD papers for strategies on how to obtain average cell parameters) or any other observable obtained from the calculations. Scripts like ```sod_vasp_cell.sh``` can help you do this, please edit carefully before using them.
 
-```sod_stat will.sh``` generate two files: probabilities.dat and statistics.dat, whose content is self-explanatory.
+```sod_stat.sh``` will generate two files: probabilities.dat and statistics.dat, whose content is self-explanatory.
 
 
-Important note: While configurational averages (e.g. of cell parameters and enthalpies) tend to converge very quickly with supercell size, entropies and free energies, which are not defined by averaging, converge very slowly with supercell size, and are generally in large error when using the SOD method. I therefore do not recommend using SOD for the calculation of entropies and free energies, unless appropriate correcting procedures have been used.
+Important note: While configurational averages (e.g. of cell parameters and enthalpies) tend to converge very quickly with supercell size, entropies and free energies, which are not defined by averaging, converge very slowly with supercell size, and are generally in large error when using the SOD method. We therefore do not recommend using SOD for the calculation of entropies and free energies, unless appropriate correcting procedures have been used.
 
 
-## If you use SOD in your research work, please include a citation to this article:
+## Extrapolating energies from low to high concentrations
+
+From version 0.44, we have implemented a simple pair-based extrapolation (SPBE) method, which uses the energies from *n*= 0, 1 and 2 substitutions to predict the energies for *n*>2 (equation 1 in [Arce-Molina et al. PCCP 2018, 20, 18047-18055](https://pubs.rsc.org/en/content/articlehtml/2018/cp/c8cp01369a)).   
+
+In order to run this program, you will need the following files:
+
+- *EQMATRIX* obtained from running sod_comb at any composition
+- *OUTSOD* for *n* substitutions
+- *ENERGIES0*: a file containing a single number, which is the energy for *n*=0
+- *ENERGIES1* and *OUTSOD1*: the ENERGIES and OUTSOD files for *n*=1 
+- *ENERGIES2* and *OUTSOD2*: the ENERGIES and OUTSOD files for *n*=2 
+- *INSPBE* file if you want to introduce some rescaling parameters (optional, see below)
+
+If all the above files are present in a folder, you can run the spbe module by running the ```spbesod``` executable. 
+
+However,  the easiest way to run the spbe module is like this:
+
+- Use the names n00 n01 n02 n03 etc for the folders containing the calculations for 0, 1, 2, 3... substitutions. 
+- Make sure that the folders n00, n01 and n02 contain an ENERGIES and an OUTSOD file each (OUTSOD is not necessary for n00)
+- If you want to use spbe, say, for n=3, first run ```sod_comb``` for n=3 substitutions, rename CALCS to n03, and create a folder within n03, say n03/spbe/
+- From the n03/spbe folder, just run the script ```sod_spbe0.sh```, which will copy the relevant input files into the current folder and will call ```spbesod```
+- It is also possible to run the spbe program using data from the other end of the solid solution (*x*=1). In that case, run the script ```sod_spbe1.sh```, which will copy the files from the folders with N, N-1, N-2 substitutions, will "invert" the OUTSOD files as needed, and call ```spbesod```. 
+
+Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations, using the INSPBE file. However, this feature is only for testing purposes at the moment. Please email Dr Grau-Crespo if interested.  
+
+## Citing SOD
+
+If you use SOD in your research work, please include a citation to this article:
 
 *Grau-Crespo, R., Hamad, S., Catlow, C. R. A., & De Leeuw, N. H. (2007). Symmetry-adapted configurational modelling of fractional site occupancy in solids. Journal of Physics: Condensed Matter, 19(25), 256201.*
 [Original Paper](http://iopscience.iop.org/article/10.1088/0953-8984/19/25/256201/meta) 
 
-and if possible send me a pdf copy of your paper.
-
 
 Happy SODing!!!
 
-Ricardo Grau-Crespo
+Ricardo Grau-Crespo (r.grau-crespo@reading.ac.uk) 
+

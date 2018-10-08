@@ -1,7 +1,8 @@
 #!/bin/bash
 
 rm -f ENERGIES 
-ls -l c??/OUTCAR |awk '{print "enervasp ", $9}' > rungetener
+n_columns_ls=`ls -l |tail -1 |awk '{ FS = "|" } ; { print NF}'`
+ls -l */OUTCAR |awk -v nc=$n_columns_ls '{print "enervasp.sh ", $nc}'> rungetener
 chmod +x rungetener
 ./rungetener
 rm rungetener
