@@ -1,4 +1,4 @@
-![Alt](https://travis-ci.org/ypriverol/sod.svg?branch=master "Travis Integration")
+[![Build Status](https://travis-ci.org/gcmt-group/sod.svg?branch=master)](https://travis-ci.org/gcmt-group/sod)
 
 # SOD 0.44 - Notes for users
 
