@@ -5,4 +5,11 @@
 - All scripts converted to bash; they are all in the ROOTSOD/bin folder, and have extension .sh
 - Resolved issue in scripts related to number of columns from ```ls -al``` command.
 - ```sod_stat``` now calculates thermodynamic properties at T=1K, 300K, 1000K and in the limit of a very high temperature, if the TEMPERATURES file does not exist.
- 
+
+## Version 0.46 (November 2018)
+
+- Increased precision of reals in spbe to avoid numerical errors. 	
+- The spbe calculation can be corrected using two reference energies, via INSPBE file.   
+- Example 1 was changed to illustrate the spbe procedure (including rescaling).
+
+

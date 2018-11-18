@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/gcmt-group/sod.svg?branch=master)](https://travis-ci.org/gcmt-group/sod)
+![Alt](https://travis-ci.org/ypriverol/sod.svg?branch=master "Travis Integration")
 
 # SOD 0.44 - Notes for users
 
@@ -33,10 +33,10 @@ You can find below the essential info needed to use SOD. Please note that SOD au
 tar xzvf sod(version).tar.gz
 ```
 
-- Make compile all the executables into the **bin** folder (you might need to edit the name of your fortran compiler in Makefile):
+- Make compile all the executables into the **bin** folder:
  
 ```bash 
-make all
+> make all
 ```
 
 - Add ROOTSOD/sod(version)/bin to your executables path 
@@ -60,13 +60,14 @@ cp ROOTSOD/sod(version)/sgo ./SGO
 
 otherwise you have to create the file using the Tables of Crystallography, or from the website of the Bilbao Crystallographic Server <www.cryst.ehy.es>. The first three numbers in each line are one row of the operator matrix and the fourth number is the component of the operator translation vector.
 
-- If you want to generate Gulp input files for all the independent configurations found by SOD, in addition to setting FILER=1 in the *INSOD* file, you must provide two files in the working directory:
+- If you want to generate Gulp input files for all the independent configurations found by SOD, in addition to setting FILER=1 in the INPUT file, you must provide two files in the working directory:
 
 top.gulp contains the heading of the gulp input file (until the keyword cell).
 
 bottom.gulp contains the tail of the gulp input file (everything after the list of coordinates, including species, potentials, etc).
 
 - To run the combinatorics program, just type:
+
 
 ```bash
 sod_comb.sh
@@ -142,8 +143,8 @@ In order to run this program, you will need the following files:
 - *EQMATRIX* obtained from running sod_comb at any composition
 - *OUTSOD* for *n* substitutions
 - *ENERGIES0*: a file containing a single number, which is the energy for *n*=0
-- *ENERGIES1* and *OUTSOD1*: the ENERGIES and OUTSOD files for *n*=1 
-- *ENERGIES2* and *OUTSOD2*: the ENERGIES and OUTSOD files for *n*=2 
+- *ENERGIES1* and *OUTSOD1*: the *ENERGIES* and *OUTSOD* files for *n*=1 
+- *ENERGIES2* and *OUTSOD2*: the *ENERGIES* and *OUTSOD* files for *n*=2 
 - *INSPBE* file if you want to introduce some rescaling parameters (optional, see below)
 
 If all the above files are present in a folder, you can run the spbe module by running the ```spbesod``` executable. 
@@ -152,11 +153,11 @@ However,  the easiest way to run the spbe module is like this:
 
 - Use the names n00 n01 n02 n03 etc for the folders containing the calculations for 0, 1, 2, 3... substitutions. 
 - Make sure that the folders n00, n01 and n02 contain an ENERGIES and an OUTSOD file each (OUTSOD is not necessary for n00)
-- If you want to use spbe, say, for *n*=3, first run ```sod_comb``` for *n*=3 substitutions, rename CALCS to n03, and create a folder within n03, say n03/spbe/
+- If you want to use spbe, say, for n=3, first run ```sod_comb``` for n=3 substitutions, rename CALCS to n03, and create a folder within n03, say n03/spbe/
 - From the n03/spbe folder, just run the script ```sod_spbe0.sh```, which will copy the relevant input files into the current folder and will call ```spbesod```
-- It is also possible to run the spbe program using data from the other end of the solid solution (*x*=1). In that case, run the script ```sod_spbe1.sh```, which will copy the files from the folders with *N*, *N*-1, *N*-2 substitutions, will "invert" the *OUTSOD* files as needed, and call ```spbesod```. 
+- It is also possible to run the spbe program using data from the other end of the solid solution (i.e. *x*=1). In that case, run the script ```sod_spbe1.sh```, which will copy the files from the folders with *N*, *N*-1, *N*-2 substitutions, will "invert" the OUTSOD files as needed, and call ```spbesod```. 
 
-Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations, using the *INSPBE* file. However, this feature is only for testing purposes at the moment. Please email Dr Grau-Crespo if interested.  
+Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations. You need to give two reference energies in the INSPBE file. The recommended procedure is to run spbe first without rescaling, pick the minimum-energy and maximum-energy configurations and run them with DFT (or whatever method provides the reference/target values), then input these two values as reference energies in INSPBE, and run the sod_spbe0.sh script as usual. An example is given in the distribution (sod0.46/examples/01-perovskite-gulp/n04/spbe0/INSPBE), where we give the reference energies for configurations 1 and 6 as input. 
 
 ## Citing SOD
 

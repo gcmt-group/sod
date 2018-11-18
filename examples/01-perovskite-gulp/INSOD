@@ -1,14 +1,14 @@
 # Title 
-Sr/La substitution in LaAlO3 perovskite
+Al/Fe substitutions in LaFeO3  perovskite 
 
 # a,b,c,alpha,beta,gamma
-3.6  3.6  3.6  90.000  90.000  90.000
+3.7  3.7  3.7  90.000  90.000  90.000
 
 # nsp: Number of species in the parent structure
 3
 
 # symbol(1:nsp): Atom symbols
-La Al O
+La Fe O
 
 # natsp0(1:nsp): Number of atoms for each species in the assymetric unit 
 1 1 1
@@ -19,17 +19,17 @@ La Al O
 0.5  0.5  0.0
 
 # na,nb,nc (supercell definition)
-4 4 4
+2 2 2
 
 # sptarget: Species to be substituted
 1
 
 # nsubs: Number of substitutions in the supercell
-2
+4
 
 # newsymbol(1:2): Symbol of atom to be inserted in the selected position, 
 #                 symbol to be inserted in the rest of the positions for the same species.
-Sr  La
+Al Fe 
 
 # FILER, MAPPER
 # FILER:   0 (no calc files generated), 1 (GULP), 2 (METADISE), 11 (VASP)
@@ -39,7 +39,7 @@ Sr  La
 
 # If FILER=1 then: 
 # ishell(1:nsp) 0 core only / 1 core and shell (for the species listed in symbol(1:nsp)) 
-0 0 1 
+1 1 1 
 # newshell(1:2) 0 core only / 1 core and shell (for the species listed in newsymbol(1:2))
-0 0
+1 1
 

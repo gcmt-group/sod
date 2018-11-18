@@ -1,5 +1,5 @@
 
-!    Copyright (c) 2014 Ricardo Grau-Crespo, Said Hamad
+!    Copyright (c) 2018 Ricardo Grau-Crespo, Said Hamad
 !
 !    This file is part of the SOD package.
 !
@@ -71,7 +71,6 @@
        OPEN (UNIT=43,FILE="filer")
        OPEN (UNIT=46,FILE="OPERATORS")
        OPEN (UNIT=47,FILE="cSGO")
-	
 
 !
 ! DEFINITION OF VARIABLES:
@@ -104,7 +103,7 @@
 !
 
        WRITE (*,*) "**************************************************************************** " 
-       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.44  " 
+       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.46  " 
        WRITE (*,*) " " 
        WRITE (*,*) "         Authors: R. Grau-Crespo and S. Hamad                                   " 
        WRITE (*,*) " " 
@@ -123,9 +122,9 @@
        READ (12,*)
        READ (12,*) op1
        do while(op1>0)
-	do i=1,3
+        do i=1,3
           READ (12,*)(mgroup1(op1,i,j),j=1,3),vgroup1(op1,i)
-	enddo
+         enddo
         nop1=op1
         READ (12,*) op1
        enddo
@@ -171,6 +170,10 @@
        READ (9,*)
        READ (9,*)
        READ (9,*) nsubs
+       If (nsubs ==0) then
+        Write(*,*) "Illegal number of substitutions"
+        Stop
+       Endif
        READ (9,*)
        READ (9,*)
        READ (9,*)
@@ -219,29 +222,11 @@
        at1r=0
        do at0=1,nat0
           do op1=1,nop1
-    	     at1r=at1r+1
+             at1r=at1r+1
              coords1r(at1r,1:3)= MATMUL(mgroup1(op1,1:3,1:3),coords0(at0,1:3))+vgroup1(op1,1:3)
-
-
-!  For some reason the matrix multiplication above has not worked in some machines. 
-!  In that case it can be expanded like this: 
-!                                 
-!             coords1r(at1r,1)= mgroup1(op1,1,1)*coords0(at0,1)&
-!                              +mgroup1(op1,1,2)*coords0(at0,2)&
-!                              +mgroup1(op1,1,3)*coords0(at0,3)&
-!                              +vgroup1(op1,1)
-!             coords1r(at1r,2)= mgroup1(op1,2,1)*coords0(at0,1)&
-!                              +mgroup1(op1,2,2)*coords0(at0,2)&
-!                              +mgroup1(op1,2,3)*coords0(at0,3)&
-!                              +vgroup1(op1,2)
-!             coords1r(at1r,3)= mgroup1(op1,3,1)*coords0(at0,1)&
-!                              +mgroup1(op1,3,2)*coords0(at0,2)&
-!                              +mgroup1(op1,3,3)*coords0(at0,3)&
-!                              +vgroup1(op1,3)
-
-                 coords1r(at1r,1)=cc(coords1r(at1r,1))
-	         coords1r(at1r,2)=cc(coords1r(at1r,2))
-	         coords1r(at1r,3)=cc(coords1r(at1r,3))
+             coords1r(at1r,1)=cc(coords1r(at1r,1))
+             coords1r(at1r,2)=cc(coords1r(at1r,2))
+             coords1r(at1r,3)=cc(coords1r(at1r,3))
              spat1r(at1r)=spat0(at0)
           enddo
        enddo

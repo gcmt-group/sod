@@ -22,15 +22,15 @@
        IMPLICIT NONE
 
 
-       INTEGER :: i,j,k,p,q,m,m1,m2,Mm,Mm1,Mm2,op,nop,npos,pos,nsubs,aux,irescale
-       REAL :: E0,EN,EN_1,e1sum,e2doublesum,mu1,mu2,e1t,e2t
+       INTEGER :: i,j,k,p,q,m,m1,m2,m1ref,m2ref,Mm,Mm1,Mm2,op,nop,npos,pos,nsubs,aux,irescale
+       REAL (KIND=8) :: E0,EN,EN_1,mu1,mu2,E1ref,E2ref
        CHARACTER*20 :: auxstring
        LOGICAL:: INSPBE_exists
-       REAL,DIMENSION(:),   ALLOCATABLE:: dE1
-       REAL,DIMENSION(:,:), ALLOCATABLE:: dE2
-       REAL,DIMENSION(:),   ALLOCATABLE:: energies1
-       REAL,DIMENSION(:),   ALLOCATABLE:: energies2
-       REAL,DIMENSION(:),   ALLOCATABLE:: energies
+       REAL (KIND=8),DIMENSION(:),   ALLOCATABLE:: dE1
+       REAL (KIND=8),DIMENSION(:,:), ALLOCATABLE:: dE2
+       REAL (KIND=8),DIMENSION(:),   ALLOCATABLE:: energies1
+       REAL (KIND=8),DIMENSION(:),   ALLOCATABLE:: energies2
+       REAL (KIND=8),DIMENSION(:),   ALLOCATABLE:: a1, a2, energies
        INTEGER,DIMENSION(:,:), ALLOCATABLE:: eqmatrix
        INTEGER,DIMENSION(:), ALLOCATABLE:: omega, omega1, omega2
        INTEGER,DIMENSION(:), ALLOCATABLE:: conf1
@@ -78,7 +78,6 @@
 ! Mm2                 Total number of configurations in conf2 (m2=1,Mm2) for the structure with 2 defects    
 ! mu1		      Scaling parameter for single defect energies 
 ! mu2		      Scaling parameter for pair-wise interactions
-! e1t, e2t            Total sum of first-order, second-order terms
 ! EN                  Energy of the x=1 endmember 
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -140,61 +139,6 @@
         enddo
 
 
-!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!      Reading the INSPBE file, if it exists, and calculating rescaling parameters mu1 and mu2
-!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
-
-       if (INSPBE_exists) then
-
-          read (17,*)
-          read (17,*) irescale
-          read (17,*)
-          select case (irescale)
-               case (0)
-                    read (17,*)
-                    write(*,*) "No rescaling (mu1=mu2=0)."
-                    write(99,*) "No rescaling (mu1=mu2=0)." 
-                    mu1=0.0
-                    mu2=0.0
-               case (1)
-                    read (17,*), mu1, mu2
-                    write(*,*) "Rescaling parameters mu1 and mu2 read from INSPBE."
-                    write(99,*) "Rescaling parameters mu1 and mu2 read from INSPBE."
-                    write(99,*) mu1, mu2
-!               case (2)
-!                    read (17,*), EN, EN_1
-!                    e1t=0.0
-!                    e2t=0.0
-!                    do p=1,npos
-!                       e1t=e1t+dE1(p)
-!                    enddo
-!                    do p=1,npos-1
-!                       do q=p+1,nsubs
-!                          e2t=e2t+dE2(p,q)
-!                       enddo
-!                    enddo
-!                    mu1 = 0
-!                    mu2 = (((EN-E0-e1t)/e2t) - 1.0)/(npos-2)
-!                    write(*,*) "Rescaling parameters calculated using the last two compositions. Only for testing."
-!                    write(99,*) "Rescaling parameters calculated using the last two compositions. Only for testing."
-!                    write(99,*) "mu1 = ", mu1, "mu2 = " mu2
-               case default
-                    mu1 = 0.0
-                    mu2 = 0.0
-                    write(*,*) "Invalid case for irescale in INSPBE - no rescaling will be applied (mu1=mu2=0.0)."
-          end select
-
-       else
-
-          mu1 = 0.0
-          mu2 = 0.0
-          write(*,*) "No INSPBE file, therefore no rescaling applied (mu1=mu2=0.0)."
-          write(99,*) "No INSPBE file, therefore no rescaling applied (mu1=mu2=0.0)."
-
-       endif
-
-
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !      Reading the files with the energies of 0, 1 and 2 substitutions (ENERGIES0, ENERGIES1 and  ENERGIES2)
@@ -248,7 +192,7 @@
        Do m2=1,Mm2
           Do op=1,nop
              dE2(eqmatrix(op,conf2(m2,1)),eqmatrix(op,conf2(m2,2)))= &
-             energies2(m2)-E0-(1.0+mu1)*(dE1(eqmatrix(op,conf2(m2,1)))+dE1(eqmatrix(op,conf2(m2,2))))
+             energies2(m2)-E0-dE1(eqmatrix(op,conf2(m2,1)))-dE1(eqmatrix(op,conf2(m2,2)))
           Enddo
        Enddo
 
@@ -263,52 +207,103 @@
 
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!      Calculating configuration-dependent summations 
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+
+       ALLOCATE(a1(1:Mm))
+       ALLOCATE(a2(1:Mm))
+
+       Do m=1,Mm
+          ! Initializing
+            a1(m)=0.0
+            a2(m)=0.0
+
+          Do p=1,nsubs
+             a1(m)=a1(m)+dE1(conf(m,p))
+          Enddo
+
+          Do p=1,nsubs-1
+             Do q=p+1,nsubs
+                a2(m)=a2(m)+dE2(conf(m,p),conf(m,q))
+             Enddo
+          Enddo
+
+       Enddo
+       
+       write(99,*)
+
+
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!      Reading the INSPBE file, if it exists, and calculating rescaling parameters mu1 and mu2
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+
+       if (INSPBE_exists) then
+
+          read (17,*)
+          read (17,*) irescale
+          read (17,*)
+          select case (irescale)
+               case (0)
+                    read (17,*)
+                    write(*,*) "No rescaling (mu1=mu2=1.0)."
+                    write(99,*) "No rescaling (mu1=mu2=1.0)."
+                    mu1=1.0
+                    mu2=1.0
+               case (1)
+                    read (17,*) mu1, mu2
+                    write(*,*) "Rescaling parameters mu1 and mu2 read from INSPBE."
+                    write(99,*) "Rescaling parameters mu1 and mu2 read from INSPBE."
+                    write(99,*) mu1, mu2
+               case (2)
+                    read (17,*) m1ref, E1ref
+                    read (17,*) m2ref, E2ref
+                    mu1=(a2(m2ref)*(E1ref-E0)-a2(m1ref)*(E2ref-E0))/(a1(m1ref)*a2(m2ref)-a2(m1ref)*a1(m2ref))
+                    mu2=(a1(m1ref)*(E2ref-E0)-a1(m2ref)*(E1ref-E0))/(a1(m1ref)*a2(m2ref)-a2(m1ref)*a1(m2ref))
+                    write(*,*) "Rescaling parameters calculated using reference energies for two configurations."
+                    write(99,*) "mu1 = ", mu1, "mu2 = ", mu2
+               case default
+                    mu1 = 0.0
+                    mu2 = 0.0
+                    write(*,*) "Invalid case for irescale in INSPBE - no rescaling will be applied (mu1=mu2=1.0)."
+          end select
+
+       else
+
+          mu1 = 1.0
+          mu2 = 1.0
+          write(*,*) "No INSPBE file, therefore no rescaling applied (mu1=mu2=1.0)."
+          write(99,*) "No INSPBE file, therefore no rescaling applied (mu1=mu2=1.0)."
+
+       endif
+
+
+
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !      Calculating ENERGIES
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 
        ALLOCATE(energies(1:Mm))
 
-       write(99,*)
-       write(99,*)
-       write(99,*) "------------------------------------------------------------------------------------------"
-       write(99,*) "Zeroth-, first-, and second-order contribution by configuration for ", nsubs, "substitutions:"
-       write(99,*) "------------------------------------------------------------------------------------------"
-       write(99,*)
-       write(99,*) "          m    E0(eV)          dE1(eV)        dE2(eV)           E[total] (eV)"
-       write(99,*) "        --------------------------------------------------------------------------"
- 
+
+          write(99,*)
+          write(99,*)
+          write(99,*) "Zeroth-, first-, and second-order contribution by configuration for ", nsubs, "substitutions:"
+          write(99,*)
+          write(99,*) "   m     E0(eV)             dE1(eV)         dE2(eV)      E[total] (eV)"
+          write(99,*) " --------------------------------------------------------------------------"
+
        Do m=1,Mm
-          ! Initializing
-            e1sum=0.0
-            e2doublesum=0.0
 
-          Do p=1,nsubs
-             e1sum=e1sum+dE1(conf(m,p))
-          Enddo
-
-          !rescaling single-defect energies
-          e1sum=(1.0+mu1*(nsubs-1))*e1sum
-
-          Do p=1,nsubs-1
-             Do q=p+1,nsubs
-                e2doublesum=e2doublesum+dE2(conf(m,p),conf(m,q))
-             Enddo
-          Enddo
-
-          !rescaling pair-wise interactions
-          e2doublesum=(1.0+mu2*(nsubs-2))*e2doublesum
-
-          !adding up all contributions
-          energies(m)=E0+e1sum+e2doublesum
-
+          energies(m)= E0 + mu1*a1(m) + mu2*a2(m)
+          write(99,'(1I5,4F16.6)') m, E0, mu1*a1(m), mu2*a2(m),  energies(m)
           write(50,*) energies(m)
-          write(99,*) m, E0, e1sum, e2doublesum, energies(m)
 
        Enddo
-       
-       write(99,*)
 
+       write(99,*)
 
 
 
@@ -325,6 +320,8 @@
        DEALLOCATE(dE1)
        DEALLOCATE(dE2)
        DEALLOCATE(energies)
+       DEALLOCATE(a1)
+       DEALLOCATE(a2)
 
 
 !!!!!!Reporting the end
