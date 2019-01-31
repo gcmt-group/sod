@@ -12,4 +12,6 @@
 - The spbe calculation can be corrected using two reference energies, via INSPBE file.   
 - Example 1 was changed to illustrate the spbe procedure (including rescaling).
 
-
+## Version 0.47 (31 January 2019)
+- spbe module creates INSPBE template (INSPBE.tmp) to make rescaling step easier. 
+- bug that led to error message when running combinatorics with FILER=0 corrected. 

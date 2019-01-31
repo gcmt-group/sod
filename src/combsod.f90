@@ -103,7 +103,7 @@
 !
 
        WRITE (*,*) "**************************************************************************** " 
-       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.46  " 
+       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.47  " 
        WRITE (*,*) " " 
        WRITE (*,*) "         Authors: R. Grau-Crespo and S. Hamad                                   " 
        WRITE (*,*) " " 
@@ -186,7 +186,7 @@
        READ (9,*) FILER, MAPPER
        READ (9,*)
 
-       if (FILER<10) then
+       if ((FILER>0).AND.(FILER<10)) then
        	READ (9,*)
        	READ (9,*)
        	READ (9,*) (ishell(sp),sp=1,nsp)
@@ -867,7 +867,8 @@
 
 
         CASE(0)
-        WRITE(*,*) "Calculation files not created. Change FILER value in INSOD file. "
+                WRITE(*,*) "Calculation files not created.&
+                           & Change FILER value in INSOD file if you want to create calculation files."
         WRITE(*,*) ""
               
 

@@ -1,6 +1,6 @@
 ## This makefile must be executed with gmake (gnu make).
 
-f90comp = gfortran-4.6
+f90comp = gfortran
 
 all:
 	$(f90comp) -o bin/statsod src/statsod.f90

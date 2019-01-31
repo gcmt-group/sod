@@ -22,8 +22,8 @@
        IMPLICIT NONE
 
 
-       INTEGER :: i,j,k,p,q,m,m1,m2,m1ref,m2ref,Mm,Mm1,Mm2,op,nop,npos,pos,nsubs,aux,irescale
-       REAL (KIND=8) :: E0,EN,EN_1,mu1,mu2,E1ref,E2ref
+       INTEGER :: i,j,k,p,q,m,m1,m2,m1ref,m2ref,mmin,mmax,Mm,Mm1,Mm2,op,nop,npos,pos,nsubs,aux,irescale
+       REAL (KIND=8) :: E0,EN,EN_1,mu1,mu2,E1ref,E2ref,emin,emax
        CHARACTER*20 :: auxstring
        LOGICAL:: INSPBE_exists
        REAL (KIND=8),DIMENSION(:),   ALLOCATABLE:: dE1
@@ -51,6 +51,8 @@
        INQUIRE(FILE="INSPBE", EXIST=INSPBE_exists)
        if (INSPBE_exists) then
           OPEN (UNIT=17, FILE="INSPBE")
+       else
+          OPEN (UNIT=18, FILE="INSPBE.tmp")
        endif
 
 !!!!!! Output files
@@ -296,15 +298,35 @@
           write(99,*) " --------------------------------------------------------------------------"
 
        Do m=1,Mm
-
           energies(m)= E0 + mu1*a1(m) + mu2*a2(m)
           write(99,'(1I5,4F16.6)') m, E0, mu1*a1(m), mu2*a2(m),  energies(m)
           write(50,*) energies(m)
-
        Enddo
 
        write(99,*)
+       write(99,*)
 
+       mmin=MINLOC(energies(1:Mm),DIM=1)
+       emin=MINVAL(energies(1:Mm))
+       mmax=MAXLOC(energies(1:Mm),DIM=1)
+       emax=MAXVAL(energies(1:Mm))
+
+       write(99,*) "Minimum-energy configuration: ", mmin, " with energy: ", emin, " eV."
+       write(99,*) "Maximum-energy configuration: ", mmax, " with energy: ", emax, " eV."
+       write(99,*)
+       write(99,*)
+
+     if (.NOT.(INSPBE_exists)) then
+      write(99,*) "To improve agreement with reference set, calculate reference energies for these two configurations," 
+      write(99,*) "then input reference energies in INSPBE file. Use INSPBE.tmp as template." 
+      write(99,*)
+      write(18,*) "# irescale case: 0 = no rescaling; 1 = enter mu1 and mu2 manually; 2= enter two reference energies &
+                  &(e.g. from DFT)"
+      write(18,*) "2" 
+      write(18,*) "# If irescale=1, enter one line with mu1, mu2; if irescale=2, enter two lines (m1, E1), (m2, E2)"
+      write(18,*) mmin, emin 
+      write(18,*) mmax, emax 
+     endif
 
 
 !!!!!!Deallocating arrays
@@ -326,8 +348,8 @@
 
 !!!!!!Reporting the end
        write (*,*) "Done!!!"
-       write (*,*) ""
-       write (*,*) ""
+       write (*,*) 
+       write (*,*) 
 
     END PROGRAM spbesod
 

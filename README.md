@@ -1,6 +1,6 @@
 ![Alt](https://travis-ci.org/ypriverol/sod.svg?branch=master "Travis Integration")
 
-# SOD 0.46 - Notes for users
+# SOD 0.47 - Notes for users
 
 SOD (standing for Site-Occupation Disorder) is a package of tools for the computer modelling of periodic systems with site disorder, using the supercell ensemble method. 
 
@@ -157,7 +157,7 @@ However,  the easiest way to run the spbe module is like this:
 - From the n03/spbe folder, just run the script ```sod_spbe0.sh```, which will copy the relevant input files into the current folder and will call ```spbesod```
 - It is also possible to run the spbe program using data from the other end of the solid solution (i.e. *x*=1). In that case, run the script ```sod_spbe1.sh```, which will copy the files from the folders with *N*, *N*-1, *N*-2 substitutions, will "invert" the OUTSOD files as needed, and call ```spbesod```. 
 
-Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations. You need to give two reference energies in the INSPBE file. The recommended procedure is to run spbe first without rescaling, pick the minimum-energy and maximum-energy configurations and run them with DFT (or whatever method provides the reference/target values), then input these two values as reference energies in INSPBE, and run the sod_spbe0.sh script as usual. An example is given in the distribution (sod0.46/examples/01-perovskite-gulp/n04/spbe0/INSPBE), where we give the reference energies for configurations 1 and 6 as input. 
+Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations. You need to give two reference energies in the INSPBE file. The recommended procedure is to run spbe first without rescaling, pick the minimum-energy and maximum-energy configurations (they are identified at the end of the OUTSPBE file) and run them with DFT (or whatever method provides the reference/target values), then input these two values as reference energies in INSPBE, and run the sod_spbe0.sh script again. An example is given in the distribution (sodx.xx/examples/01-perovskite-gulp/n04/spbe0/INSPBE), where the reference energies for configurations 1 and 6 are given as input. 
 
 ## Citing SOD
 

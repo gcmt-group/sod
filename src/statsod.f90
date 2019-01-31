@@ -1,5 +1,5 @@
 !*******************************************************************************
-!    Copyright (c) 2014 Ricardo Grau-Crespo, Said Hamad
+!    Copyright (c) 2019 Ricardo Grau-Crespo, Said Hamad
 !
 !    This file is part of the SOD package.
 !
@@ -22,7 +22,7 @@
 
        IMPLICIT NONE
 
-       INTEGER,PARAMETER :: NCONFMAX=10000, NCOLMAX=20, NTEMPMAX=100
+       INTEGER,PARAMETER :: NCONFMAX=100000, NCOLMAX=20, NTEMPMAX=100
        REAL*8,PARAMETER :: kB=8.61734E-5
        INTEGER :: m, auxm, Mm, g, ncol, col, tt, Ntt, nsubs
        INTEGER, DIMENSION(NTEMPMAX) :: mpmax, mpmin
@@ -185,7 +185,7 @@
 !          Write PROBABILITIES for temperature T 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 	   
-	   write(20,*) "        m  omega(m)         Sd(m)      ene(m)       Ed(m)        p(m)"
+           write(20,*) "        m  omega(m)         Sd(m)      ene(m)       Ed(m)        p(m)"
 	   do m=1,Mm
 	      write(20,100) m,omega(m),Sd(m),ene(m),Ed(m,tt),p(m,tt)
   100         format(i10,2x,i8,2x,e12.6,3(2x,f10.4))

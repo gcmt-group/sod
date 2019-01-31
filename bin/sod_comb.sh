@@ -66,4 +66,4 @@ if [ $FILER -ne 0 ]; then
 fi
 
 cd ..
-rm filer coord* 
+rm -f filer coord* 
