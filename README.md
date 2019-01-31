@@ -1,6 +1,6 @@
 ![Alt](https://travis-ci.org/ypriverol/sod.svg?branch=master "Travis Integration")
 
-# SOD 0.44 - Notes for users
+# SOD 0.46 - Notes for users
 
 SOD (standing for Site-Occupation Disorder) is a package of tools for the computer modelling of periodic systems with site disorder, using the supercell ensemble method. 
 
