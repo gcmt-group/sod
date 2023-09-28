@@ -12,6 +12,18 @@
 - The spbe calculation can be corrected using two reference energies, via INSPBE file.   
 - Example 1 was changed to illustrate the spbe procedure (including rescaling).
 
-## Version 0.47 (31 January 2019)
+## Version 0.47 (January 2019)
 - spbe module creates INSPBE template (INSPBE.tmp) to make rescaling step easier. 
-- bug that led to error message when running combinatorics with FILER=0 corrected. 
+- Bug that led to error message when running combinatorics with FILER=0 corrected. 
+
+## Version 0.51 (September 2023)
+- Some memory issues in combinatorial generation sorted.
+- sod_gener.sh generates VASP or GULP input files from OUTSOD (and INSOD) without having to redo the combinatorics.
+- Grand-canonical analysis now posible using sod_gcstat.sh.
+- Stress-volume correction  in the grand-canonical analysis implemented.
+- Canonical analysis with sod_stat.sh now includes the full disorder limit.
+- Other minor improvements in format for statistical analysis. 
+- Statistics on spectra (both canonical and grand-canonical)
+- Input files for CASTEP can be created. 
+
+

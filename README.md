@@ -1,6 +1,4 @@
-![Alt](https://travis-ci.org/ypriverol/sod.svg?branch=master "Travis Integration")
-
-# SOD 0.47 - Notes for users
+# SOD 0.51 - Notes for users
 
 SOD (standing for Site-Occupation Disorder) is a package of tools for the computer modelling of periodic systems with site disorder, using the supercell ensemble method. 
 
@@ -15,7 +13,7 @@ You can find below the essential info needed to use SOD. Please note that SOD au
 - Calculation of the degeneracies of configurations.
 - Generation of input files for codes like GULP and VASP.
 - Simple extrapolation of energies from low to high concentrations within a supercell.
-- Statistical mechanics processing of output.
+- Statistical mechanics processing of output using either canonical or grand-canonical ensembles.
 
 
 ## Content of the folders
@@ -27,7 +25,7 @@ You can find below the essential info needed to use SOD. Please note that SOD au
 
 ## Compiling & installing SOD
 
-- Download the file sod(version).tar.gz (e.g. sod0.44.tar.gz) and copy to a directory, say ROOTSOD:
+- Download the file sod(version).tar.gz (e.g. sod0.51.tar.gz) and copy to a directory, say ROOTSOD:
  
 ```bash
 tar xzvf sod(version).tar.gz
@@ -36,7 +34,7 @@ tar xzvf sod(version).tar.gz
 - Make compile all the executables into the **bin** folder:
  
 ```bash 
-> make all
+make all
 ```
 
 - Add ROOTSOD/sod(version)/bin to your executables path 
@@ -48,9 +46,9 @@ export PATH=$PATH:ROOTSOD/sod(version)/bin
 
 ## Running SOD
 
-- We recommend to create a new folder (say FOLDER_NAME) for each application. This will be referred to as the working directory.
+- We recommend to create a new folder (say FOLDER_NAME) for each sod project. This will be referred to as the working directory.
 
-- In FOLDER_NAME, you must create a file named *INSOD* which contains all the information for running the combinatorics part of the program. Use the *INSOD* file given in one of the examples. The file is self-explanatory. The format of this file is rigid, so keep the same number of blank lines.
+- In FOLDER_NAME, you must create a file named *INSOD* which contains all the information for running the combinatorics part of the program. Use the *INSOD* file given in one of the examples as a template. The file is self-explanatory. The format of this file is rigid, so keep the same number of blank lines.
 
 - In FOLDER_NAME, you must also include a file named SGO with the matrix-vector representations of the symmetry operators. First check if your space group is included in the ROOTSOD/sod(version)/sgo library; if this is the case, just copy the file into your working directory, under the name SGO:
 
@@ -58,7 +56,7 @@ export PATH=$PATH:ROOTSOD/sod(version)/bin
 cp ROOTSOD/sod(version)/sgo ./SGO
 ```
 
-otherwise you have to create the file using the Tables of Crystallography, or from the website of the Bilbao Crystallographic Server <www.cryst.ehy.es>. The first three numbers in each line are one row of the operator matrix and the fourth number is the component of the operator translation vector.
+otherwise you have to create the file using the International Tables of Crystallography, or from the website of the Bilbao Crystallographic Server <www.cryst.ehy.es>. The first three numbers in each line are one row of the operator matrix and the fourth number is the component of the operator translation vector.
 
 - If you want to generate Gulp input files for all the independent configurations found by SOD, in addition to setting FILER=1 in the INPUT file, you must provide two files in the working directory:
 
@@ -81,7 +79,7 @@ sod_comb.sh
 
 - It also writes the file *EQMATRIX*, which gives information about  how each supercell operator transforms each atom position. 
 
-- The directory *CALCS* is generated, which contains the input files for GULP or VASP, a copy of the *OUTSOD* and *EQMATRIX* files,  and a script that sends the job. 
+- The directory *CALCS* is generated, which contains the input files for GULP or VASP, a copy of the *OUTSOD* and *EQMATRIX* files,  and a script that sends the job. It is good practice to rename the *CALCS* folders as *n01*, *n02*, etc depending on the number of substitutions. That folder structure is used by some of the other sod executables (say for statistics or for energy extrapolation). 
 
 
 ## Configurational averages and thermodynamics:
@@ -128,10 +126,82 @@ which requires 4 input files:
 
 The data can be cell lenghts, or volumes (please see SOD papers for strategies on how to obtain average cell parameters) or any other observable obtained from the calculations. Scripts like ```sod_vasp_cell.sh``` can help you do this, please edit carefully before using them.
 
-```sod_stat.sh``` will generate two files: probabilities.dat and statistics.dat, whose content is self-explanatory.
+```sod_stat.sh``` will generate two files: probabilities.dat and thermodynamics.dat, whose content is self-explanatory.
 
 
 Important note: While configurational averages (e.g. of cell parameters and enthalpies) tend to converge very quickly with supercell size, entropies and free energies, which are not defined by averaging, converge very slowly with supercell size, and are generally in large error when using the SOD method. We therefore do not recommend using SOD for the calculation of entropies and free energies, unless appropriate correcting procedures have been used.
+
+
+## Grand-canonical analysis 
+
+From version 0.51, it is possible to do statistics in a grand-canonical ensemble, i.e. including results from supercells with different compositions. Please see example4 (perovskites) and example5 (pyrochlore).
+
+We recommend to create a file with name x??? at the same level as the n?? files. For example x250 is used for a grandcanonical analyis at composition x=0.250. 
+
+ The *OUTSOD_00*, *OUTSOD_01*, *OUTSOD_02*, *OUTSOD_03, and *OUTSOD04* files are the *OUTSOD* files for 0, 1, 2, 3, and 4 substitutions, respectively (note that sod_comb returns an error when you try to create zero substitutions, so *OUTSOD_00* must be created by hand at the moment; this will be corrected in future versions). You also need the *ENERGIES_00* ... *ENERGIES_04* files there. Optionally, you can add *DATA_00*, ..., *DATA_04*. The *TEMPERATURES* file can also be provided (optional, as for the canonical statistics). 
+
+In order to do the grand-canonical analysis, you need the grand-canonical input file *INGC*, which has a very simple structure. For example, to set the chemical potential, the first few lines of the file look like this:
+
+```bash
+# nsubsmin nsubsmax
+0   4
+# Specify x or mu, and provide its value
+mu -0.5
+```
+
+But it is possible to specify the composition (fraction x=nsubs/npos of sites that are substituted) and the chemical potential will be calculated automatically for each temperature. The chemical potential is obtained from a Newton-Raphson solution to a polynomial equation. To do this the INGC file should look like:
+
+```bash
+# nsubsmin nsubsmax
+0   4
+# Specify x or mu, and provide its value
+x 0.25
+```
+
+In this example, x=0.25 corresponds to 2 substitutions in the canonical example, but in the grand-canonical analysis of the example, all compositions from 0 to 4 substitutions are included. 
+
+To run the grand-canonical analysis, type:
+
+```sod_gcstat.sh```
+
+If the naming convention n?? for the different compositions was followed, and the x??? file is at the same level of those, the script will copy all the necessary files automatically, so you only need the *INGC* file. The analysis produces a probabilities.dat and a thermodynamics.dat file as in the canonical analysis.   
+
+Finally, it is possible to make a "stress-volume" correction to the energies in the grand-canonical configurational ensemble. This correction is a simple way to account for the fact that if a cell with number of substitutions n (different from xN) contributes to a grand-canonical ensemble representing composition x, there is an additional stress-related energy cost. This is due to the difference in equilibrium volumes at compositions n/N and x. In a first approximation, if we know both the equilibrium volume and bulk module as a function of x, the energy of the stress-volume correction (ESVC) is 
+
+$ESVC(n,x) = \frac{1}{2} B(x) (V(x) - V\left(\frac{n}{N}\right)^2)$
+
+It is possible to introduce this correction in the grand-canonical analysis by adding the following lines to INGC (see example5): 
+
+```bash
+# Stress corrections flag (lambda=0: no correction; lambda=1: bulk moduli-based correction)
+1
+# Parameters for volume variation with x: v0, v1, bv (Angstrom^3)
+1302.567820  1286.687504  0
+# Parameters for bulk modulus variation with x: bm0, bm1, bb (GPa)
+150 150 0
+```
+This allows a simple linear interpolation of the equilibrium volumes and bulk moduli between the solid solution endmembers. A quadratic interpolation is also possible by using non-zero values of the bowing parameters bv and/or bb. This functionality has not been well tested yet. If interested in using this correction scheme, please contact the SOD developers for further information. 
+
+
+## Averaging spectra
+
+Both in the canonical and in the grand-canonical analysis, it is possible to evaluate averages of spectra in the corresponding configurational ensemble. 
+
+Often, what is originally calculated for a given configuration is a list of peaks. In that case, running the "peaks2spectra" code, with the script: 
+
+```sod_p2s.sh```
+
+will generate the broadened spectra that will be averaged. This requires two input files (with fixed names):
+
+- *PEAKS* contains a list of peaks in each line; each line represents a different configuration (a different spectrum is generated for each configuration)
+- *INP2S* contains other info needed to generate the spectra, e.g. xmin, xmax, broadening(sigma), etc. See example5 for the format.
+
+That generates two output files:
+
+- *SPECTRA*, where each line contains the generated intensity values in the x grid, for each configuration.
+- *XSPEC*, which contains the list of x values at which the intensities are given.
+
+If these files are present within the n??/ folders when running the statistics codes (either ```sod_stat.sh``` or ```sod_gcstat.sh```), then a file with name ```ave_spectra.dat``` will be created with the configurational averages of the spectra at different temperatures.  
 
 
 ## Extrapolating energies from low to high concentrations
@@ -157,8 +227,8 @@ However,  the easiest way to run the spbe module is like this:
 - From the n03/spbe folder, just run the script ```sod_spbe0.sh```, which will copy the relevant input files into the current folder and will call ```spbesod```
 - It is also possible to run the spbe program using data from the other end of the solid solution (i.e. *x*=1). In that case, run the script ```sod_spbe1.sh```, which will copy the files from the folders with *N*, *N*-1, *N*-2 substitutions, will "invert" the OUTSOD files as needed, and call ```spbesod```. 
 
-Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations. 
-You need to give two reference energies in the INSPBE file. The recommended procedure is to run spbe first without rescaling, pick the minimum-energy and maximum-energy configurations (they are identified at the end of the OUTSPBE file) and run them with DFT (or whatever method provides the reference/target values), then input these two values as reference energies in INSPBE, and run the sod_spbe0.sh script again. An example is given in the distribution (sodx.xx/examples/01-perovskite-gulp/n04/spbe0/INSPBE), where the reference energies for configurations 1 and 6 are given as input. When the spbe program runs, it creates a template INSPBE.tmp that can be edited and copied into INSPBE. 
+Finally, it is possible to introduce some rescaling in the first-order and second-order terms to improve the match with a reference set of calculations. You need to give two reference energies in the INSPBE file. The recommended procedure is to run spbe first without rescaling, pick the minimum-energy and maximum-energy configurations (they are identified at the end of the OUTSPBE file) and run them with DFT (or whatever method provides the reference/target values), then input these two values as reference energies in INSPBE, and run the sod_spbe0.sh script again. See example4 (inside n04/spbe0), where the reference energies for configurations 1 and 6 are given as input. 
+
 
 ## Citing SOD
 
@@ -170,5 +240,4 @@ If you use SOD in your research work, please include a citation to this article:
 
 Happy SODing!!!
 
-Ricardo Grau-Crespo (r.grau-crespo@reading.ac.uk) 
-
+Ricardo Grau-Crespo (r.grau-crespo@reading.ac.uk) and Said Hamad (said@upo.es)

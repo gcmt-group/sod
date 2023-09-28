@@ -53,7 +53,7 @@
        implicit none
 
        integer k
-       Integer a(k)
+       integer a(k)
        integer j
        integer, save :: m = 0
        integer, save :: m2 = 0

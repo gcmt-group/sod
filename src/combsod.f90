@@ -1,5 +1,5 @@
 
-!    Copyright (c) 2018 Ricardo Grau-Crespo, Said Hamad
+!    Copyright (c) 2022 Ricardo Grau-Crespo, Said Hamad
 !
 !    This file is part of the SOD package.
 !
@@ -21,40 +21,40 @@
     PROGRAM combsod 
        IMPLICIT NONE
 
-       INTEGER,PARAMETER :: NSPMAX=10 , NATMAX=10000, NOPMAX=5000, NCELLMAX=1000
+       INTEGER,PARAMETER :: NSPMAX=10 , NATMAX=10000, NOPMAX=10000, NCELLMAX=1000
        INTEGER,PARAMETER :: NLINEAMAX=200 
-       REAL,PARAMETER :: tol0=0.0001, kB=8.61734E-5
-      
-       INTEGER :: i,j,k,l,xx,yy,suma,t,ina,inb,inc,elei, factorial, sub
+       REAL,PARAMETER :: tol0=0.001, kB=8.61734E-5
+
+       INTEGER :: i,j,k,l,xx,yy,suma,t,ina,inb,inc,elei, sub
        INTEGER :: op1, nop1, op, nop, opsc, nopsc,ifound,op1new,nop1new,aux,opc,nopc
        INTEGER :: sp, nsp, spmap, nspmap, cumnatsp, cumnatspmap, sptarget, sptargetmap,ssp
        INTEGER :: at0, nat0, at1, nat1, nat1r, at, nat , atmap, natmap, at1r, at1i,attmp,att,mapno,FILER, MAPPER
        INTEGER :: na,nb,nc,nsubs,nsubsmap,atini,atfin,atinimap,atfinmap
-       INTEGER :: pos,npos,count,ntc,ntcmax,nic,equivcount,iequiv,indcount
+       INTEGER :: pos,npos
+       INTEGER (kind=8):: ntc, count, nic, equivcount, iequiv, indcount, combinations
        LOGICAL :: found,foundnoind,mores
        INTEGER,DIMENSION(:), ALLOCATABLE:: newconf
        INTEGER,DIMENSION(2)   :: newshell, newshellmap
        INTEGER,DIMENSION(NOPMAX)   :: op1good
-       INTEGER,DIMENSION(:), ALLOCATABLE:: degen
-       INTEGER,DIMENSION(NSPMAX) :: natsp0, natsp1, natsp, natspmap, snatsp, ishell, ishellmap
-       INTEGER,DIMENSION(NATMAX) :: spat0, spat1, spat, spatmap, spat1r
-       REAL,DIMENSION(NATMAX,3) :: coords0, coords1, coords, coords1r, result, coordsmap
-       REAL,DIMENSION(3) :: coordstemp
-       REAL,DIMENSION(3,3) :: cellvector
        REAL,DIMENSION(NOPMAX,3,3) :: mgroup1, mgroup, mgroup1new
        REAL,DIMENSION(NOPMAX,3)   :: vgroup1, vgroup,vgroup1sca,vgroup1scb,vgroup1scc,vgroup1new
-       REAL,DIMENSION(NCELLMAX,3)   :: vt
-       REAL,DIMENSION(3) :: x, vcorr
        INTEGER,DIMENSION(NOPMAX,NATMAX)   :: fulleqmatrix,eqmatrixtarget
+       INTEGER,DIMENSION(NATMAX) :: spat0, spat1, spat, spatmap, spat1r
+       REAL,DIMENSION(NATMAX,3) :: coords0, coords1, coords, coords1r, result, coordsmap
+       INTEGER,DIMENSION(NATMAX)   :: as,test
+       INTEGER,DIMENSION(:), ALLOCATABLE:: degen
+       INTEGER,DIMENSION(NSPMAX) :: natsp0, natsp1, natsp, natspmap, snatsp, ishell, ishellmap
+       REAL,DIMENSION(3) :: coordstemp, vcorr
+       REAL,DIMENSION(3,3) :: cellvector
+       REAL,DIMENSION(NCELLMAX,3)   :: vt
        INTEGER,DIMENSION(:,:), ALLOCATABLE:: conf,indconf,indconfmap,equivconf
        INTEGER,DIMENSION(:,:), ALLOCATABLE:: mapping
-       INTEGER,DIMENSION(NATMAX)   :: as,test
        REAL :: a1,b1,c1,alpha,beta,gamma,a,b,c,cc, amap, bmap, cmap, alphamap, betamap, gammamap
-       REAL :: prod, xs, ientropyguess, ientropy, perc
+       REAL :: prod, x, maxentropy, ientropy, perc
        CHARACTER,DIMENSION(NSPMAX) :: symbol*3, symbolmap*3, ssymbol*3
        CHARACTER,DIMENSION(2) :: newsymbol*3, newsymbolmap*3
        CHARACTER :: linea*85, title*15, tmptitle*15, runtitle*40
-       CHARACTER :: sindcount*5,snumber*4
+       CHARACTER :: sindcount*5, snumber*4, tmpstr*50 
 
 
 ! Input files
@@ -103,7 +103,7 @@
 !
 
        WRITE (*,*) "**************************************************************************** " 
-       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.47  " 
+       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.51  " 
        WRITE (*,*) " " 
        WRITE (*,*) "         Authors: R. Grau-Crespo and S. Hamad                                   " 
        WRITE (*,*) " " 
@@ -506,6 +506,10 @@
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 	npos=natsp(sptarget)
+        if (npos==nsubs) then
+            write(*,*) "Ilegal number of substitutions"
+            STOP
+        endif
 	do op=1,nop
 	att=0
 	do at=atini,atfin
@@ -524,43 +528,46 @@
 !         Generate the list of configurations
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
          
-        xs=REAL(nsubs)/REAL(npos)
-        ientropyguess=-1*npos*kB*(xs*log(xs)+(1-xs)*log(1-xs))
-!              that was using Stirling's formula,
-!              real ientropy= factorial(npos)/(factorial(npos-nsubs)*factorial(nsubs))	
-        ntcmax=exp(ientropyguess/kB)
-        WRITE(*,*) "       Maximum entropy for this composition:              ", ientropyguess, " eV/K"
-        WRITE(*,*) " " 
-        
-
-!!!!!!!!Allocating array sizes
-
-        ALLOCATE(degen(1:ntcmax))
-        ALLOCATE(newconf(1:nsubs))
-        ALLOCATE(conf(1:ntcmax,1:nsubs))
-        ALLOCATE(indconf(1:ntcmax,1:nsubs))
-        ALLOCATE(equivconf(1:ntcmax,1:nsubs))
-
-   	mores=.false.
-	as(:)=1
-	    
-	count=1
-	   call ksubset(npos,nsubs,as,mores)
-	   conf(1,1:nsubs)=as(1:nsubs)
-	do while(mores)
-	   call ksubset(npos,nsubs,as,mores)
-           count=count+1
-	   conf(count,1:nsubs)=as(1:nsubs)
-	enddo
-
-        ntc=count
-        ientropy=kB*log(ntc*1.0)
-
-        WRITE(*,*) "       Maximum entropy for this composition and supercell:", ientropy, " eV/K"
+        ntc=combinations(nsubs,npos)
+        maxentropy= kB*LOG(REAL(ntc))	
         WRITE(*,*) " " 
         WRITE(*,*) "       Total number of configurations in the supercell:     ", ntc 
         WRITE(*,*) " " 
+        WRITE(*,*) "       Maximum entropy for this composition and supercell:", maxentropy, " eV/K"
+        WRITE(*,*) " " 
 
+
+        x=REAL(nsubs)/REAL(npos)
+        WRITE(*,*) "       Fraction of substituted sites:                 x = ", x
+        WRITE(*,*) " " 
+        ientropy=-npos*kB*(x*log(x)+(1-x)*log(1-x))
+        WRITE(*,*) "       Ideal entropy (per cell) for this composition:     ", ientropy, " eV/K"
+        WRITE(*,*) " " 
+!        ntcmax=exp(ientropy/kB)
+        
+!!!!!!!!Allocating array sizes
+
+        ALLOCATE(degen(1:ntc))
+        ALLOCATE(newconf(1:nsubs))
+        ALLOCATE(conf(1:ntc,1:nsubs))
+        ALLOCATE(indconf(1:ntc,1:nsubs))
+        ALLOCATE(equivconf(1:ntc,1:nsubs))
+
+        mores=.false.
+        as(:)=1
+        count=1
+        call ksubset(npos,nsubs,as,mores)
+        conf(1,1:nsubs)=as(1:nsubs)
+        do while(mores)
+           call ksubset(npos,nsubs,as,mores)
+           count=count+1
+           conf(count,1:nsubs)=as(1:nsubs)
+        enddo
+
+        if (count.ne.ntc) then
+                write(*,*) "Error in KSUBSET subroutine"
+                STOP
+        endif
 
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -716,7 +723,7 @@
        if (MAPPER>0) then
  
            ALLOCATE(mapping(1:npos,1:MAPPER))
-           ALLOCATE(indconfmap(1:ntcmax,1:nsubs*MAPPER))
+           ALLOCATE(indconfmap(1:ntc,1:nsubs*MAPPER))
 
 
 !!!!!!!!!!!Opening and reading MAPTO file
@@ -842,7 +849,7 @@
            DEALLOCATE(newconf)
            DEALLOCATE(indconf)
            ALLOCATE(newconf(1:nsubs))
-           ALLOCATE(indconf(1:ntcmax,1:nsubs))
+           ALLOCATE(indconf(1:ntc,1:nsubs))
 
            indconf(:,:)=indconfmap(:,:) 
 
@@ -961,6 +968,8 @@
 
         enddo
 
+        CLOSE (UNIT=41)
+        CLOSE (UNIT=42)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!! METADISE  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1015,6 +1024,8 @@
         CLOSE (UNIT=indcount+100000)
 
         enddo
+        CLOSE (UNIT=51)
+        CLOSE (UNIT=52)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!	VASP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1100,6 +1111,74 @@
         CLOSE (indcount+100000)
 
         enddo
+
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+!!!!!!	CASTEP !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	CASE(12)
+
+        WRITE (*,*) " " 
+        WRITE (*,*) "Creating input files for CASTEP in ./CALCS... " 
+        WRITE (*,*) " " 
+
+        OPEN (UNIT=62,FILE="bottom.castep")
+
+        do indcount=1,nic
+   	   newconf(1:nsubs)=indconf(indcount,1:nsubs)
+   
+           WRITE(indcount+100000,'(a19)') "%BLOCK lattice_cart" 
+   
+           call cell(cellvector, a, b,c,alpha,beta,gamma)
+           WRITE(indcount+100000,335) cellvector(1,1), cellvector(2,1), cellvector(3,1)
+           WRITE(indcount+100000,335) cellvector(1,2), cellvector(2,2), cellvector(3,2)
+           WRITE(indcount+100000,335) cellvector(1,3), cellvector(2,3), cellvector(3,3)
+   
+           WRITE(indcount+100000,'(a22)') "%ENDBLOCK lattice_cart"
+           WRITE(indcount+100000,'(a21)') "%BLOCK positions_frac"
+   
+   
+           do at=1,nat
+   		sp=spat(at)
+   		if (sp.ne.sptarget) then
+                       WRITE(indcount+100000,337) symbol(sp),coords(at,1),coords(at,2),coords(at,3)
+   		else
+   		    att=at-atini+1
+                       call member(nsubs,newconf,att,ifound)
+   		    if (ifound==1) then
+   		         WRITE (indcount+100000,337) newsymbol(1),coords(at,1),coords(at,2),coords(at,3)
+                       else
+   		         WRITE (indcount+100000,337) newsymbol(2),coords(at,1),coords(at,2),coords(at,3)
+   		    endif
+   		endif
+ 337       format(a3,3(f11.7,2x))
+           enddo
+   
+           WRITE(indcount+100000,'(a24)') "%ENDBLOCK positions_frac"
+   
+           if (indcount>99999) then
+              WRITE (indcount+100000,*) "Error, too many configurations (>99999)! Calculation files not written!"
+           endif
+   
+
+           do l=1,NLINEAMAX
+                READ (62,332,end=499) linea
+                WRITE(indcount+100000,333) linea
+           enddo
+ 499    continue
+           rewind(62)
+   
+           if (indcount>99999) then
+           WRITE (indcount+100000,*) "Error, too many configurations (>99999)! Calculation files not written!"
+           endif
+
+           CLOSE (UNIT=indcount+100000)
+
+        enddo
+
+        CLOSE (UNIT=62)
+
 
 	END SELECT
 

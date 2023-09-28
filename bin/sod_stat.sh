@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script run the stats program of the SOD package
+# This script runs the stats program of the SOD package
 
 statsod
 

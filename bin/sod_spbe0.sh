@@ -12,3 +12,4 @@ cp ../../n02/ENERGIES ./ENERGIES2
 
 spbesod
 
+rm -f EQMATRIX OUTSOD* ENERGIES? 

@@ -12,7 +12,7 @@ combsod
 FILER=$(<filer)
 
 if [ $FILER -ne 0 ]; then
-  mkdir CALCS
+  mkdir -p CALCS
   cd CALCS
   mv ../fort.* .
   cp ../OUTSOD .
@@ -36,6 +36,13 @@ if [ $FILER -ne 0 ]; then
     extin="vasp"
     extout="vout"
     program="vasp"
+  fi
+
+  # FILER=12 for CASTEP
+  if [ $FILER -eq 12 ]; then
+    extin="cell"
+    extout="castep"
+    program="castep"
   fi
 
   ls fort.* > tmp1
