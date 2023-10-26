@@ -103,7 +103,7 @@
 !
 
        WRITE (*,*) "**************************************************************************** " 
-       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.51  " 
+       WRITE (*,*) "         SOD (Site Occupancy Disorder) version 0.52  " 
        WRITE (*,*) " " 
        WRITE (*,*) "         Authors: R. Grau-Crespo and S. Hamad                                   " 
        WRITE (*,*) " " 

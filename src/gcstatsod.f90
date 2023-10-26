@@ -1,4 +1,4 @@
-!*******************************************************************************
+!v*******************************************************************************
 !    Copyright (c) 2014 Ricardo Grau-Crespo, Said Hamad
 !
 !    This file is part of the SOD package.
@@ -18,35 +18,36 @@
 !
 !******************************************************************************
 
-       PROGRAM gcstats 
+       PROGRAM gcstatsod 
 
        IMPLICIT NONE
 
-       INTEGER,PARAMETER :: NCONFMAX=10000, NCOLMAX=10, NPOINTSMAX=800, NTEMPMAX=50, NOUTSODSMAX=30, NBISMAX=1000
+       INTEGER,PARAMETER :: NCONFMAX=10000, NCOLMAX=10, NPOINTSMAX=800, NTEMPMAX=30, NOUTSODSMAX=23, NBISMAX=1000
        REAL (kind=8),PARAMETER :: kB=8.61734E-5, tolprob=1.0E-12, tolminspec=1.0E-6, eVA3toGPa=160.2176621
        INTEGER :: m, auxm, g, ncol, col, tt, Ntt, nsubs, nbis, npoints, point
-       INTEGER :: mEmin, mEmax, nsubsEmin
+       INTEGER :: mEmin, mEmax, nsubsEmin, ioStatus
        REAL (kind=8)  :: Emin, Emax, paux, maxspec
-       INTEGER :: nsubsmin, nsubsmax
-       REAL (kind=8),DIMENSION(NTEMPMAX) :: Z,E,F,S,T,Gpot
+       INTEGER :: nsubsmin, nsubsmax, nconfigmax
+       REAL (kind=8),DIMENSION(:), allocatable :: Z,E,F,S,T,Gpot
        REAL (kind=8) :: Zinf, Einf, Sinf
-       REAL (kind=8),DIMENSION(0:NOUTSODSMAX,NCONFMAX,NCOLMAX) :: data
+       REAL (kind=8),DIMENSION(:,:,:), ALLOCATABLE :: data
        REAL (kind=8),DIMENSION(NCOLMAX,NTEMPMAX) :: avedata
-       REAL (kind=8),DIMENSION(0:NOUTSODSMAX,NCONFMAX,NPOINTSMAX) :: spec
+       REAL (kind=8),DIMENSION(:,:,:), ALLOCATABLE :: spec
        REAL (kind=8),DIMENSION(NPOINTSMAX,NTEMPMAX) :: avespec
        REAL (kind=8),DIMENSION(NCOLMAX) :: avedatainf
-       REAL (kind=8),DIMENSION(NPOINTSMAX) :: xspec, avespecinf
+       REAL (kind=8),DIMENSION(:), allocatable :: xspec, avespecinf
 
        LOGICAL :: TEMPERATURES_exists, DATA_exists, INGC_exists, SPECTRA_exists, booldata, boolspec
        REAL (kind=8) :: xormuvalue, x, xeq, mu, nx, deltamu, oldmu 
        CHARACTER :: xormu*2
        CHARACTER :: charnsubs*1, filenameout*9, auxstring*15,filenameene*11
-       CHARACTER,DIMENSION(0:NOUTSODSMAX) :: filenamedat*9, filenamespec*12
-       INTEGER :: n, noutsods, nsubsread, npos
-       INTEGER,DIMENSION(0:NOUTSODSMAX) :: Mm
-       INTEGER,DIMENSION(0:NOUTSODSMAX,NCONFMAX) :: omega
-       REAL (kind=8),DIMENSION(0:NOUTSODSMAX,NCONFMAX)  :: ene, enemun, enemunrel 
-       REAL (kind=8),DIMENSION(0:NOUTSODSMAX,NCONFMAX,NTEMPMAX)  :: p
+       CHARACTER,DIMENSION(:), ALLOCATABLE:: filenamedat*9, filenamespec*12
+       INTEGER :: n, nsubsread, npos
+       INTEGER,DIMENSION(:,:), ALLOCATABLE :: omega
+       REAL (kind=8),DIMENSION(:,:),  ALLOCATABLE :: ene, enemun, enemunrel 
+       INTEGER,DIMENSION(:), ALLOCATABLE:: Mm
+       !REAL (kind=8),DIMENSION(0:NOUTSODSMAX,NCONFMAX,NTEMPMAX)  :: p
+       REAL (kind=8),DIMENSION(:,:,:), ALLOCATABLE  :: p
        REAL (kind=8),DIMENSION(0:NOUTSODSMAX,NTEMPMAX)  :: pn
        CHARACTER(len=30) fmtemplist
 
@@ -56,25 +57,58 @@
        REAL (kind=8)  :: momentaA0, momentaA1, momentaA2, momentaB0, momentaB1, momentaB2
        REAL (kind=8)  :: a11, a12, a21, a22, bb1, bb2, alpha, beta, pbinomial
        REAL (kind=8),DIMENSION(0:NOUTSODSMAX)  :: Qn, C, tau
-       REAL (kind=8),DIMENSION(0:NOUTSODSMAX,NCONFMAX)  :: pinf
+       REAL (kind=8),DIMENSION(:,:), allocatable  :: pinf
        REAL (kind=8),PARAMETER :: tolmu=1.0E-10, tolq=1.0E-10
-       
        REAL (kind=8) SUM, SUMSQ, valpolynom, qtest
        REAL (kind=8) valpolynomnew, valpolynomb, r1, r2, qa, qb, q, va, vb
-
        REAL (kind=8) lambda, v0, v1, bv, bm0, bm1, bb, vol, bm, voln, xn
        REAL (kind=8),DIMENSION(0:NOUTSODSMAX)  :: EVSC
 
-!Input files
+
+
+ !Reading the TEMPERATURES files (checking first if it exists)
+
 
        INQUIRE(FILE="TEMPERATURES", EXIST=TEMPERATURES_exists)
+
+       Ntt=2 !this is the value by defect if TEMPERATURES does not exist
+
        if (TEMPERATURES_exists) then
-          OPEN (UNIT=10, FILE="TEMPERATURES")
+          OPEN (UNIT=10, FILE="TEMPERATURES", STATUS='OLD', ACTION='READ', IOSTAT=ioStatus)
+          Ntt = 0
+          DO
+             READ(10, '(A)', IOSTAT=ioStatus) auxstring 
+             IF (ioStatus /= 0) EXIT
+             Ntt=Ntt + 1
+          END DO
        else
           write(*,*)
-          write(*,*) "TEMPERATURES files not found - analysis will be done at 300 K and 1000 K only."
+          write(*,*) "TEMPERATURES file not found - analysis will be done at 300 K and 1000 K only."
           write(*,*)
        endif
+
+       !Allocating arrays with tt as index
+       allocate(T(1:Ntt))
+       allocate(Z(1:Ntt))
+       allocate(E(1:Ntt))
+       allocate(F(1:Ntt))
+       allocate(S(1:Ntt))
+       allocate(Gpot(1:Ntt))
+       
+       if (TEMPERATURES_exists) then
+         rewind(10)
+         do tt=1, Ntt 
+            read(10,*)  T(tt)
+         enddo
+         CLOSE(10)
+       else
+         T(1)=300.0
+         T(2)=1000.0
+       endif
+
+
+ !Reading the INGC input file 
+
 
        INQUIRE(FILE="INGC", EXIST=INGC_exists)
        if (INGC_exists) then
@@ -85,35 +119,7 @@
        endif
 
 
-!Output files
-       OPEN (UNIT=20,FILE="probabilities.dat")
-       OPEN (UNIT=21,FILE="thermodynamics.dat")
 
-
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!      Read the TEMPERATURES files
-!cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
-        if (TEMPERATURES_exists) then
-           tt=1
-  1        continue
-           read(10,*,end=10)  T(tt)
-           tt=tt+1
-           goto 1
-  10       continue
-           Ntt=tt-1
-           CLOSE(10)
-        else
-           T(1)=300.0
-           T(2)=1000.0
-           Ntt=2
-        endif
-
-
-
-    write(*,*) "Performing grand-canonical analysis..."
-    write(*,*) 
-    write(*,*) 
 
     !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
     !      Read the INGC file
@@ -139,11 +145,17 @@
        mu=xormuvalue
     endif
 
+    !Allocating arrays including nsubs as index
+    ALLOCATE(filenamedat(0:nsubsmax))
+    ALLOCATE(filenamespec(0:nsubsmax))
+    ALLOCATE(Mm(0:nsubsmax))
+
+
+
     !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
     !      Read the OUTSOD_xx files
     !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
    
-    noutsods =  nsubsmax-nsubsmin+1
 
     do nsubs = nsubsmin, nsubsmax
        if (nsubs < 10 ) then 
@@ -166,6 +178,20 @@
    
        read(100+nsubs,*) Mm(nsubs)
        write(*,*) "Number of inequivalent configurations with ",nsubs," substitutions: ",Mm(nsubs)
+    enddo
+
+    nconfigmax = maxval(Mm) 
+
+    !Allocating arrays including also m as index
+    ALLOCATE(omega(0:nsubsmax,1:nconfigmax))
+    ALLOCATE(ene(0:nsubsmax,1:nconfigmax))
+    ALLOCATE(enemun(0:nsubsmax,1:nconfigmax))
+    ALLOCATE(enemunrel(0:nsubsmax,1:nconfigmax))
+    ALLOCATE(p(0:nsubsmax,1:nconfigmax,1:Ntt))
+    allocate(pinf(0:nsubsmax,1:nconfigmax))
+
+    do nsubs = nsubsmin, nsubsmax
+
        do m=1, Mm(nsubs)
          read(100+nsubs,*)  auxm, omega(nsubs,m)
        enddo
@@ -173,9 +199,8 @@
        
     enddo
    
-    !write(*,*) "nsubsmin,nsubsmax,npos=",nsubsmin,nsubsmax,npos
-    !write(*,*) "nsubsmin/npos=",REAL(nsubsmin)/REAL(npos)
-    !write(*,*) "nsubsmax/npos=",REAL(nsubsmax)/REAL(npos)
+
+
     if ((xormu.eq."x ").AND.((x.lt.REAL(nsubsmin)/REAL(npos)).or.(x.gt.REAL(nsubsmax)/REAL(npos)))) then
        write(*,*) "x is out of range, given the number of substitutions considered"
        write(*,*) "x should be between",REAL(nsubsmin)/REAL(npos),"and",REAL(nsubsmax)/REAL(npos)
@@ -184,9 +209,7 @@
     endif
 
 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-    !      Read ENERGIES_xx files 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    !Reading ENERGIES_xx files 
    
     do nsubs = nsubsmin, nsubsmax
        if (nsubs < 10 ) then
@@ -205,10 +228,8 @@
        CLOSE(200+nsubs)
     enddo
 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-    !      Read DATA_xx files 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+   !Reading DATA_xx files 
 
    do nsubs = nsubsmin, nsubsmax
        if (nsubs < 10 ) then
@@ -225,29 +246,30 @@
           write(*,*) "DATA file found for", nsubs, "substitutions"
           OPEN (UNIT=300+nsubs,FILE=trim(filenamedat(nsubs)), status='old')
           read(300+nsubs,*) ncol
-          do m=1,Mm(nsubs)
-             read(300+nsubs,*) data(nsubs,m,1:ncol)
-          enddo
-          CLOSE (300+nsubs)
        endif
        DATA_exists=(booldata.and.DATA_exists)
     enddo
 
     if (DATA_exists) then
+       ALLOCATE(data(0:nsubsmax,1:nconfigmax,1:ncol))
        write(*,*) 
        write(*,*) "Average data will be calculated."
        write(*,*) 
-       OPEN (UNIT=22,FILE="ave_data.dat")
+       do nsubs = nsubsmin, nsubsmax
+          do m=1,Mm(nsubs)
+             read(300+nsubs,*) data(nsubs,m,1:ncol) 
+          enddo
+          CLOSE (300+nsubs)
+       enddo
     else
        write(*,*) 
        write(*,*) "At least one DATA file not found. No average data will be calculated."
        write(*,*) 
     endif
 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-    !      Read SPECTRA_xx files 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+
+   !Reading SPECTRA_xx files 
 
    do nsubs = nsubsmin, nsubsmax
        if (nsubs < 10 ) then
@@ -264,19 +286,23 @@
           write(*,*) "SPECTRA file found for", nsubs, "substitutions"
           open (UNIT=400+nsubs,FILE=trim(filenamespec(nsubs)), status='old')
           read(400+nsubs,*) npoints
-          do m=1,Mm(nsubs) 
-             read(400+nsubs,*) spec(nsubs,m,1:npoints)
-          enddo
-          CLOSE(400+nsubs)
        endif
        SPECTRA_exists=(boolspec.and.SPECTRA_exists)
     enddo
+
 
     if (SPECTRA_exists) then
        write(*,*) 
        write(*,*) "Average spectra will be calculated."
        write(*,*) 
-       OPEN (UNIT=23,FILE="ave_spectra.dat")
+       ALLOCATE(spec(0:nsubsmax,1:nconfigmax,1:npoints))
+       ALLOCATE(xspec(1:npoints))
+       do nsubs = nsubsmin, nsubsmax
+          do m=1,Mm(nsubs) 
+             read(400+nsubs,*) spec(nsubs,m,1:npoints)
+          enddo
+          CLOSE(400+nsubs)
+       enddo
        OPEN (UNIT=15, FILE="XSPEC")
        do point=1,npoints
           read(15,*)  xspec(point)
@@ -288,34 +314,39 @@
        write(*,*) "At least one SPECTRA file not found. No average spectra will be calculated."
        write(*,*) 
     endif
+    
+
+    
+
+    !Opening output files
+    OPEN (UNIT=20,FILE="probabilities.dat")
+    OPEN (UNIT=21,FILE="thermodynamics.dat")
+    if (DATA_exists) then
+       OPEN (UNIT=22,FILE="ave_data.dat")
+    endif
+    if (SPECTRA_exists) then
+       OPEN (UNIT=23,FILE="ave_spectra.dat")
+    endif
 
 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-    !       Start writing thermodynamics.dat file
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
+    !Starting to write thermodynamics.dat file
     write(21,*) "       T             E               F          S             "
 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-    !       Start writing ave_data.dat file
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+    !Starting to write ave_data.dat file
     if (DATA_exists) then
        write(22,*) "       T    Average data"
     endif
 
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-    !       Start writing ave_spectra.dat file
-    !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
+    !Starting to write ave_spectra.dat file
     if (SPECTRA_exists) then
 !       WRITE(fmtemplist,'(a4,i1,a15)') "(a6,",Ntt,adjustl("(f13.1,2x),a12)")
 !       write(23,fmtemplist) "x   ",     T(1:Ntt),"    Infinity"
-! XXX Arreglar esto
+!       FIX THIS 
        write(23,*) "x   ",     T(1:Ntt)
     endif
 
-   
    
     !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
     !       This starts the loop over all temperature values
@@ -336,8 +367,6 @@
        !      If x is specified, get mu
        !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
        if (xormu.eq."x ") then  ! if for xormu.eq."x "
-
-!xx1
 
           !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
           !      Calculate omegasum
@@ -553,6 +582,9 @@
           !          Calculate probabilities and x (equilibrium composition) from mu 
           !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
           
+
+
+
           nx = 0
           do nsubs = nsubsmin, nsubsmax
              do m=1,Mm(nsubs)
@@ -564,7 +596,6 @@
           xeq= nx/npos
           write(*,*) "Composition calculated for this chemical potential: x = ", xeq
 
-!xx2
        else !(xormu = 'mu')
           !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
           !          Get minimum value of the grand potential to calculate enemunrel
@@ -622,7 +653,6 @@
           x = xeq
 
        endif ! End if for xormu.eq."x "
-!xx3
 
        !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
        !          Writing  probabilities.txt file
@@ -853,6 +883,7 @@
 
     ! Calculate avespecinf 
     if (SPECTRA_exists) then
+       allocate(avespecinf(1:npoints))
        avespecinf(1:npoints)=0.0
        do point=1,npoints
           do nsubs = nsubsmin, nsubsmax

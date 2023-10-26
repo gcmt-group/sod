@@ -1,5 +1,5 @@
 # nsubsmin nsubsmax
-0   16
+1   16
 # Specify x or mu, and provide its value
 x 0.125
 # Stress corrections flag (lambda=0: no correction; lambda=1: bulk moduli-based correction)

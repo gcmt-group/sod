@@ -18,5 +18,6 @@ clean:
 	rm bin/gcstatsod
 	rm bin/genersod
 	rm bin/spbesod
+	rm bin/peaks2spec
 
 

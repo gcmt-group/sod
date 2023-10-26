@@ -26,4 +26,8 @@
 - Statistics on spectra (both canonical and grand-canonical)
 - Input files for CASTEP can be created. 
 
+## Version 0.52 (October 2023)
+- Made arrays allocatable in gcstatsod.f90, which fixes some issue with gfortran compilar in MacOS.
+- Added the sgo/ folder, which was missing in previous release by mistake. 
+
 

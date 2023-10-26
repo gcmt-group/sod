@@ -1,4 +1,4 @@
-# SOD 0.51 - Notes for users
+# SOD 0.52 - Notes for users
 
 SOD (standing for Site-Occupation Disorder) is a package of tools for the computer modelling of periodic systems with site disorder, using the supercell ensemble method. 
 
@@ -25,7 +25,7 @@ You can find below the essential info needed to use SOD. Please note that SOD au
 
 ## Compiling & installing SOD
 
-- Download the file sod(version).tar.gz (e.g. sod0.51.tar.gz) and copy to a directory, say ROOTSOD:
+- Download the file sod(version).tar.gz (e.g. sod0.52.tar.gz) and copy to a directory, say ROOTSOD:
  
 ```bash
 tar xzvf sod(version).tar.gz
@@ -149,7 +149,7 @@ In order to do the grand-canonical analysis, you need the grand-canonical input 
 mu -0.5
 ```
 
-But it is possible to specify the composition (fraction x=nsubs/npos of sites that are substituted) and the chemical potential will be calculated automatically for each temperature. The chemical potential is obtained from a Newton-Raphson solution to a polynomial equation. To do this the INGC file should look like:
+But it is possible to specify the composition (fraction x=nsubs/npos of sites that are substituted) and the chemical potential will be calculated automatically for each temperature. The chemical potential is obtained from a solution to a polynomial equation, using a simple bisection method. To do this the INGC file should look like:
 
 ```bash
 # nsubsmin nsubsmax
@@ -164,11 +164,11 @@ To run the grand-canonical analysis, type:
 
 ```sod_gcstat.sh```
 
-If the naming convention n?? for the different compositions was followed, and the x??? file is at the same level of those, the script will copy all the necessary files automatically, so you only need the *INGC* file. The analysis produces a probabilities.dat and a thermodynamics.dat file as in the canonical analysis.   
+If the naming convention *n??* for the different compositions was followed, and the *x???* file is at the same level of those, the script will copy all the necessary files automatically, so you only need the *INGC* file. The analysis produces a probabilities.dat and a thermodynamics.dat file as in the canonical analysis.   
 
-Finally, it is possible to make a "stress-volume" correction to the energies in the grand-canonical configurational ensemble. This correction is a simple way to account for the fact that if a cell with number of substitutions n (different from xN) contributes to a grand-canonical ensemble representing composition x, there is an additional stress-related energy cost. This is due to the difference in equilibrium volumes at compositions n/N and x. In a first approximation, if we know both the equilibrium volume and bulk module as a function of x, the energy of the stress-volume correction (ESVC) is 
+Finally, it is possible to make a "stress-volume" correction to the energies in the grand-canonical configurational ensemble. This correction is a simple way to account for the fact that if a cell with number of substitutions n (different from xN) contributes to a grand-canonical ensemble representing composition x, there is an additional stress-related energy cost. This is due to the difference in equilibrium volumes at compositions n/N and x. In a first approximation, if we know both the equilibrium volume and bulk module as a function of x, the energy of the stress-volume correction ($ESVC$) is 
 
-$ESVC(n,x) = \frac{1}{2} B(x) (V(x) - V\left(\frac{n}{N}\right)^2)$
+$ESVC(n,x) = \frac{1}{2} B(x) (V(x) - V\left(\frac{n}{N}\right))^2$
 
 It is possible to introduce this correction in the grand-canonical analysis by adding the following lines to INGC (see example5): 
 
@@ -180,7 +180,7 @@ It is possible to introduce this correction in the grand-canonical analysis by a
 # Parameters for bulk modulus variation with x: bm0, bm1, bb (GPa)
 150 150 0
 ```
-This allows a simple linear interpolation of the equilibrium volumes and bulk moduli between the solid solution endmembers. A quadratic interpolation is also possible by using non-zero values of the bowing parameters bv and/or bb. This functionality has not been well tested yet. If interested in using this correction scheme, please contact the SOD developers for further information. 
+This setting leads to a simple linear interpolation of the equilibrium volumes and bulk moduli between the solid solution endmembers. A quadratic interpolation is also possible by using non-zero values of the bowing parameters $bv$ and/or $bb$. This functionality has not been well tested yet. If interested in using this correction scheme, please contact the SOD developers for further information. 
 
 
 ## Averaging spectra
